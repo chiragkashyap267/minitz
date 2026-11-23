@@ -6,3 +6,10 @@
 /storage/*.key
 *.log
 .DS_Store
+/application/vendor/
+/application/.env
+/application/storage/
+/application/bootstrap/cache/*
+/application/database/*.sqlite*
+/.runtime/
+/dist/

@@ -1,22 +1,30 @@
 # Minitz
 
-Custom Minitz storefront based on the supplied paper-world design.
+Custom paper-world storefront and a matching Laravel kitchen desk, using the original blue, yellow, orange, lilac and green palette.
 
-## Deploy this initial frontend on Hostinger
+## Included
 
-- Website type: Custom PHP/HTML.
-- Git repository: chiragkashyap267/minitz.
-- Branch: main.
-- Deploy the repository contents into the site's empty public_html directory. index.html is the entry file at the repository root.
-- No build command, Node server or paid library is required for this frontend.
-- Use a temporary domain for review before replacing an existing live site.
+- Responsive homepage with reduced-motion-aware animation.
+- Product catalogue, search, category and price sorting, product pages and a server-priced session cart.
+- Recipes, printable cooking notes, brand story, contact and editable placeholder policies.
+- Branded admin login and dashboard; product and recipe management with image uploads; banners, headings, social links and delivery settings.
+- Preview checkout, customer and order records, fulfilment controls for verified payments, and private order/customer/sales PDFs.
+- Razorpay integration code with server-created orders, callback signatures, signed captured-payment webhooks and duplicate-event handling. Live payments are disabled by default.
 
-## Current status
+## Deployment stages
 
-The reference homepage, original palette, recipes, illustrations and preview interactions are included. Images are separate cacheable files. Checkout is still a preview; no payment is collected. The custom admin dashboard, database, real cart/orders, Razorpay verification and PDF exports are planned and are not implemented in this initial deployment.
+Root `index.php` serves the read-only preview until dependencies, environment, database and admin setup are complete. Root `index.html` is the matching static homepage. No build command is required for the storefront assets.
 
-## Planned application
+Follow [DEPLOYMENT.md](DEPLOYMENT.md) for Hostinger setup, runtime directories, MySQL and secure admin creation. Git excludes dependencies; use Composer through SSH or the dependency-inclusive ZIP.
 
-Laravel + Blade, compiled Tailwind CSS, Alpine.js where needed, optional GSAP effects, Hostinger MySQL/storage, Razorpay and private PDF reports. Deployment configuration will change when the Laravel application is introduced; only its public directory will be web-accessible.
+There are no default hosted admin credentials. Environment files, customer records and runtime data are excluded from Git. The catalogue, prices, packaging, recipes and policies are placeholders; default checkout creates preview orders without payment or delivery.
 
-Never commit live credentials, .env files, customer records or private reports. Client-supplied artwork remains subject to its original ownership and permissions.
+## Stack
+
+Laravel 12 and Blade, MySQL on Hostinger (SQLite locally), custom CSS, small vanilla JavaScript interactions, Dompdf and Razorpay. No paid UI kit or animation library is required.
+
+## Verification
+
+`tests/smoke.py` checks the local storefront, cart pricing, preview ordering, access control, CSRF, admin editing and PDF generation. `tests/payment.php` checks mocked payment events, invalid signatures, mismatched totals/currency and idempotency. Tests target local sample data only. Desktop and 390px mobile layouts were reviewed in the browser.
+
+Merchant sandbox/live credentials, SMTP delivery and production MySQL must still be configured and verified on the hosting account. Live-launch items, including unpaid-stock reservation reconciliation, final taxes, coverage rules and approved policy content, are listed in the deployment guide.

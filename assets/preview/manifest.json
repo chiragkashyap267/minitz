@@ -1,0 +1,22 @@
+{
+  "/": "home.html",
+  "/shop": "shop.html",
+  "/recipes": "recipes.html",
+  "/cart": "cart.html",
+  "/admin/login": "admin-login.html",
+  "/pages/about": "pages-about.html",
+  "/pages/contact": "pages-contact.html",
+  "/pages/privacy": "pages-privacy.html",
+  "/pages/terms": "pages-terms.html",
+  "/pages/shipping": "pages-shipping.html",
+  "/pages/returns": "pages-returns.html",
+  "/pages/payment": "pages-payment.html",
+  "/shop/everyday-garam-masala": "shop-everyday-garam-masala.html",
+  "/shop/sunday-biryani-blend": "shop-sunday-biryani-blend.html",
+  "/shop/comfort-curry-blend": "shop-comfort-curry-blend.html",
+  "/shop/the-kitchen-trio": "shop-the-kitchen-trio.html",
+  "/recipes/sunday-biryani": "recipes-sunday-biryani.html",
+  "/recipes/chicken-curry": "recipes-chicken-curry.html",
+  "/recipes/korma": "recipes-korma.html",
+  "/admin": "admin-login.html"
+}

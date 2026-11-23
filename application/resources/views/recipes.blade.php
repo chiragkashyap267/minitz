@@ -1,0 +1,3 @@
+@extends('layout')
+@section('title','The kitchen — Minitz')
+@section('content')<section class="page-hero lilac"><span class="eyebrow">NO PERFECT PLATES REQUIRED</span><h1>A little inspiration.<br><em>Your own little twist.</em></h1><p>Something for tonight. Something for the weekend. Something that feels like you.</p></section><section class="section"><div class="catalogue-caption"><span>From the Minitz kitchen</span><span>Sample recipes · final instructions coming soon</span></div><div class="recipe-grid">@forelse($recipes as $recipe)@include('partials.recipe-card')@empty<p>The recipe notebook is opening soon.</p>@endforelse</div></section>@endsection
