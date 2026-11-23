@@ -6,6 +6,8 @@ The public website is temporarily covered by a clean Coming soon page on all rou
 
 ## Included
 
+Local development now also includes a sliding cart drawer with live quantity and coupon updates; customer sign-in, registration and order history; configurable percentage/flat coupons; paper mascots with Hindi speech bubbles; the scroll-led blend showcase; inline printer-style recipe receipts; and a looping square-video section with admin-managed placeholders or uploaded clips. These changes are being developed locally while the hosted holding page stays in place.
+
 - Responsive homepage with reduced-motion-aware animation.
 - Product catalogue, search, category and price sorting, product pages and a server-priced session cart.
 - Recipes, printable cooking notes, brand story, contact and editable placeholder policies.
@@ -28,5 +30,9 @@ Laravel 12 and Blade, MySQL on Hostinger (SQLite locally), custom CSS, small van
 ## Verification
 
 `tests/smoke.py` checks the local storefront, cart pricing, preview ordering, access control, CSRF, admin editing and PDF generation. `tests/payment.php` checks mocked payment events, invalid signatures, mismatched totals/currency and idempotency. Tests target local sample data only. Desktop and 390px mobile layouts were reviewed in the browser.
+
+`tests/commerce.py` checks customer order isolation, capped percentage and flat discounts, minimum spend, expiry/start dates, paused codes, per-email and total coupon limits, and inline recipe receipts. It removes its temporary fixtures afterward. To create the requested local sample customer and codes, run `php artisan minitz:demo-customer` inside `application` while APP_ENV=local and STORE_DEMO=true. This command is refused outside local preview mode.
+
+Local customer: `cook@minitz.test` / `Minitz-Cook-2026!`. Sample codes: `KITCHEN10` for 10% off and `LITTLE50` for INR 50 off. The sample account is independent of the local admin account. No hosted default customer credentials are created.
 
 Merchant sandbox/live credentials, SMTP delivery and production MySQL must still be configured and verified on the hosting account. Live-launch items, including unpaid-stock reservation reconciliation, final taxes, coverage rules and approved policy content, are listed in the deployment guide.

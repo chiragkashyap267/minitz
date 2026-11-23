@@ -1,6 +1,13 @@
 <?php
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Hash;
+Artisan::command('minitz:demo-customer',function(){
+ if(!app()->environment('local')||!config('store.demo')){$this->error('Local preview mode only.');return 1;}
+ \Illuminate\Support\Facades\DB::table('customers')->updateOrInsert(['email'=>'cook@minitz.test'],['name'=>'Sample Cook','password'=>Hash::make('Minitz-Cook-2026!'),'created_at'=>now(),'updated_at'=>now()]);
+ foreach([['KITCHEN10','percentage',1000],['LITTLE50','flat',5000]] as [$code,$type,$value])\Illuminate\Support\Facades\DB::table('coupons')->insertOrIgnore(['code'=>$code,'type'=>$type,'value'=>$value,'minimum'=>0,'usage_limit'=>1000,'per_customer_limit'=>50,'active'=>true,'created_at'=>now(),'updated_at'=>now()]);
+ foreach(['The first little bite','Sunday at their table','A weeknight little win','Made with a little love'] as $title)if(!\Illuminate\Support\Facades\DB::table('testimonials')->where('title',$title)->exists())\Illuminate\Support\Facades\DB::table('testimonials')->insert(['title'=>$title,'caption'=>'Your kitchen story will go here.','active'=>true,'created_at'=>now(),'updated_at'=>now()]);
+ $this->info('Local sample customer, two coupons and video placeholders are ready.');
+});
 Artisan::command('minitz:admin',function(){
  $email=$this->ask('Admin email');
  if(!filter_var($email,FILTER_VALIDATE_EMAIL)) {$this->error('A valid email is required.');return 1;}

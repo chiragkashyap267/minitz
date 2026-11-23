@@ -1,0 +1,2 @@
+@php $poses=['question'=>'09','point'=>'10','welcome'=>'11','sniff'=>'05']; @endphp
+<div class="mascot-companion mascot-{{ $pose??'point' }} {{ $class??'' }}" data-parallax="{{ ($pose??'point')==='question'?'0.025':'-0.018' }}"><img src="/assets/artwork-{{ $poses[$pose??'point'] }}.webp" alt="Minitz paper cook" loading="lazy" width="180" height="320"><p class="mascot-bubble" lang="hi">{{ $words }}</p></div>

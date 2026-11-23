@@ -77,4 +77,10 @@ php -S 127.0.0.1:8087 router.php
 
 The local setup uses SQLite, HTTP-only local preview cookies and sample mode. It does not create a default admin. Tests in `tests/smoke.py` expect a local-only fixture admin described in the test source; never use those credentials on a hosted account. Payment event checks use only local mocked data and roll back their database changes.
 
+For the local customer test flow, run `php artisan minitz:demo-customer` after migrations. It creates a local sample customer, two discount codes and four square video placeholders. The account page provides a fill-sample-login button; preview checkout provides a fill-sample-delivery button. Preview orders never invoke Razorpay. The command is restricted to local preview mode, and the sample password is not a production credential.
+
+Coupon discounts use integer paise; percentage values are stored in hundredths of a percent. The server recalculates discounts, caps, dates and usage limits at order placement under a coupon-row lock. Usage is checked per checkout email. Codes do not stack and shipping is not discounted. Preview orders consume a local preview use; real payment orders reserve one, captured payment marks it used, and cancellation through the order-cancellation logic releases a reserved use.
+
+Kitchen videos can be replaced in `/admin/videos`. Square posters use JPG/PNG/WebP up to 2 MB; clips use MP4/WebM up to 25 MB. Configure PHP upload_max_filesize and post_max_size to accommodate clips before enabling large uploads. Real video assets and permission to publish them remain client-provided. The placeholder clips are not fabricated testimonials.
+
 The storefront uses custom CSS and small vanilla JavaScript interactions. No paid UI kit, animation subscription or browser framework is required. Laravel and Dompdf licences are included with their packages. Original artwork permissions remain with the client.
