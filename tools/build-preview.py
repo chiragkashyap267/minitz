@@ -32,5 +32,5 @@ while paths:
     manifest[path]=filename
 manifest['/admin']=manifest['/admin/login']
 (out/'manifest.json').write_text(json.dumps(manifest,indent=2),encoding='utf-8',newline='\n')
-(root/'index.html').write_text((out/'home.html').read_text(encoding='utf-8'),encoding='utf-8',newline='\n')
+# Keep the public index.html holding page intact during local development.
 print('Built',len(manifest),'read-only preview routes; no credentials or customer records included.')

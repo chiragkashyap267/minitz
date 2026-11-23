@@ -1,4 +1,4 @@
-"""Check the shipped preview without credentials or a database."""
+"""Check the public holding page while preserving the full preview sources."""
 from pathlib import Path
 import shutil
 import subprocess
@@ -9,6 +9,7 @@ root=Path(__file__).resolve().parents[1]
 fixture=root.parent/'.local-tests'/'minitz-fallback'
 (fixture/'assets'/'preview').mkdir(parents=True,exist_ok=True)
 shutil.copyfile(root/'index.php',fixture/'index.php')
+shutil.copyfile(root/'coming-soon.html',fixture/'coming-soon.html')
 for file in (root/'assets'/'preview').glob('*'):
     shutil.copyfile(file,fixture/'assets'/'preview'/file.name)
 manifest=json.loads((root/'assets'/'preview'/'manifest.json').read_text())
@@ -29,5 +30,6 @@ for path,filename in manifest.items():
     Links().feed(html)
     code='$_SERVER["REQUEST_METHOD"]="GET"; $_SERVER["REQUEST_URI"]='+json.dumps(path)+'; require "index.php";'
     result=subprocess.run(['C:/xampp/php/php.exe','-r',code],cwd=fixture,capture_output=True,check=True)
-    assert 'Store preview'.encode() in result.stdout,path
-print('PASS',len(manifest),'unconfigured-host preview routes, asset references, internal links and no embedded credentials/tokens')
+    assert b'Coming soon.' in result.stdout,path
+    assert b'Add to bag' not in result.stdout,path
+print('PASS',len(manifest),'public routes show the holding page; full preview sources and links remain intact')

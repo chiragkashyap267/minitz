@@ -2,6 +2,8 @@
 
 Custom paper-world storefront and a matching Laravel kitchen desk, using the original blue, yellow, orange, lilac and green palette.
 
+The public website is temporarily covered by a clean Coming soon page on all routes. All storefront and dashboard source remains intact. The full application is available on the explicitly enabled local development server. See the temporary mode instructions in DEPLOYMENT.md.
+
 ## Included
 
 - Responsive homepage with reduced-motion-aware animation.
@@ -13,7 +15,7 @@ Custom paper-world storefront and a matching Laravel kitchen desk, using the ori
 
 ## Deployment stages
 
-Root `index.php` serves the read-only preview until dependencies, environment, database and admin setup are complete. Root `index.html` is the matching static homepage. No build command is required for the storefront assets.
+During construction, `index.php`, `index.html` and the hosting rewrite rules show the holding page. Once that temporary gate is removed, the existing read-only-preview and Laravel activation stages apply. No build command is required for the storefront assets.
 
 Follow [DEPLOYMENT.md](DEPLOYMENT.md) for Hostinger setup, runtime directories, MySQL and secure admin creation. Git excludes dependencies; use Composer through SSH or the dependency-inclusive ZIP.
 

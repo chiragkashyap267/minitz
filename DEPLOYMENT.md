@@ -1,5 +1,18 @@
 # Hostinger deployment
 
+## Temporary coming soon mode
+
+The public site currently serves `coming-soon.html` on every path. All application code and preview pages remain intact. `index.html` is a copy of the holding page for static-host compatibility. `.htaccess` routes public requests to the holding page, and `index.php` also defaults to it.
+
+To edit the full application locally in PowerShell:
+
+```powershell
+$env:MINITZ_LOCAL_PREVIEW='1'
+& 'C:/xampp/php/php.exe' -S 127.0.0.1:8087 router.php
+```
+
+This bypass is restricted to PHP's local development-server runtime and cannot be enabled through a visitor URL. When the store is approved for launch, remove the three labelled holding-page rewrite rules, remove the holding-page gate at the top of index.php, and restore index.html from assets/preview/home.html or remove that static entry. Then follow the activation steps below. Do not remove the application-directory access restrictions.
+
 The repository supports two stages. Without backend configuration it serves the included read-only storefront preview. Ordering buttons are disabled and no customer information is collected. After the database and admin are configured, enable the Laravel application to use the working sample catalogue and preview checkout.
 
 ## Upload or Git deploy
