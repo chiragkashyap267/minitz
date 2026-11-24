@@ -1,2 +1,2 @@
-@php $poses=['question'=>'09','point'=>'10','welcome'=>'11','sniff'=>'05']; @endphp
-<div class="mascot-companion mascot-{{ $pose??'point' }} {{ $class??'' }}" data-parallax="{{ ($pose??'point')==='question'?'0.025':'-0.018' }}"><img src="/assets/artwork-{{ $poses[$pose??'point'] }}.webp" alt="Minitz paper cook" loading="lazy" width="180" height="320"><p class="mascot-bubble" lang="hi">{{ $words }}</p></div>
+@php $poses=['question'=>'02-man-puzzled','point'=>'03-woman-pointing-right','welcome'=>'04-man-presenting-left','sniff'=>'01-woman-aroma']; @endphp
+<div class="mascot-companion mascot-{{ $pose??'point' }} {{ $class??'' }}" data-parallax="-0.018"><img src="/assets/brand/{{ $poses[$pose??'point'] }}.webp" alt="{{ ($pose??'point')==='question'||($pose??'point')==='welcome'?'Nitz, the curious paper cook':'Mini, the paper cook' }}" loading="lazy" width="180" height="320"><p class="mascot-bubble" lang="hi">{{ $words }}</p></div>
