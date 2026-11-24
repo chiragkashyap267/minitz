@@ -6,7 +6,7 @@ import json
 from html.parser import HTMLParser
 
 root=Path(__file__).resolve().parents[1]
-fixture=root.parent/'.local-tests'/'minitz-fallback'
+fixture=root/'.local'/'tests'/'fallback'
 (fixture/'assets'/'preview').mkdir(parents=True,exist_ok=True)
 shutil.copyfile(root/'index.php',fixture/'index.php')
 shutil.copyfile(root/'coming-soon.html',fixture/'coming-soon.html')

@@ -13,3 +13,5 @@
 /application/database/*.sqlite*
 /.runtime/
 /dist/
+
+/.local/

@@ -3,14 +3,14 @@ from pathlib import Path
 import zipfile
 
 root=Path(__file__).resolve().parents[1]
-out=root.parent/'outputs'/'Minitz_Hostinger_Preview.zip'
+out=root/'.local'/'outputs'/'Minitz_Hostinger_Preview.zip'
 out.parent.mkdir(parents=True,exist_ok=True)
 with zipfile.ZipFile(out,'w',zipfile.ZIP_DEFLATED,compresslevel=6) as z:
     for file in root.rglob('*'):
         if not file.is_file():continue
         rel=file.relative_to(root)
         path=rel.as_posix()
-        if rel.parts[0] in ['.git','.runtime','dist','tests','tools']:continue
+        if rel.parts[0] in ['.git','.local','.runtime','dist','tests','tools']:continue
         if path.startswith(('application/storage/','application/bootstrap/cache/')):continue
         if path in ['application/.env','application/database/database.sqlite','application/local-setup.php','router.php']:continue
         if file.name.endswith(('.log','.tmp','.sqlite','.sqlite-shm','.sqlite-wal')):continue
