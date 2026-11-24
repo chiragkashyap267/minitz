@@ -2,6 +2,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\StoreController as S;
 use App\Http\Controllers\CommerceController as C;
+use App\Http\Controllers\BlogController as B;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Cache\RateLimiting\Limit;
 foreach(['cart'=>60,'checkout'=>10,'admin-login'=>5,'customer-auth'=>10,'payments'=>20,'webhook'=>120] as $name=>$limit) {
@@ -10,6 +11,8 @@ foreach(['cart'=>60,'checkout'=>10,'admin-login'=>5,'customer-auth'=>10,'payment
 Route::get('/',[S::class,'home']);
 Route::get('/shop',[S::class,'shop']);
 Route::get('/shop/{slug}',[S::class,'product']);
+Route::get('/blogs',[B::class,'index']);
+Route::get('/blogs/{slug}',[B::class,'show']);
 Route::get('/recipes',[S::class,'recipes']);
 Route::get('/recipes/{slug}',[S::class,'recipe']);
 Route::get('/recipes/{slug}/receipt',[C::class,'recipeReceipt']);
@@ -35,6 +38,11 @@ Route::post('/admin/login',[S::class,'authenticate'])->middleware('throttle:admi
 Route::middleware('admin')->group(function(){
  Route::post('/admin/logout',[S::class,'logout']);
  Route::get('/admin',[S::class,'admin']);
+ Route::get('/admin/blogs',[B::class,'dashboard']);
+ Route::get('/admin/blogs/new',[B::class,'editor']);
+ Route::get('/admin/blogs/{id}/edit',[B::class,'editor'])->whereNumber('id');
+ Route::post('/admin/blogs/{id?}',[B::class,'save'])->whereNumber('id');
+ Route::post('/admin/blogs/{id}/archive',[B::class,'archive'])->whereNumber('id');
  Route::get('/admin/reports/{type}/{id?}',[S::class,'pdf'])->whereNumber('id');
  Route::post('/admin/products/{id?}',[S::class,'saveProduct'])->whereNumber('id');
  Route::post('/admin/recipes/{id?}',[S::class,'saveRecipe'])->whereNumber('id');

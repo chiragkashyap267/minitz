@@ -84,3 +84,13 @@ Coupon discounts use integer paise; percentage values are stored in hundredths o
 Kitchen videos can be replaced in `/admin/videos`. Square posters use JPG/PNG/WebP up to 2 MB; clips use MP4/WebM up to 25 MB. Configure PHP upload_max_filesize and post_max_size to accommodate clips before enabling large uploads. Real video assets and permission to publish them remain client-provided. The placeholder clips are not fabricated testimonials.
 
 The storefront uses custom CSS and small vanilla JavaScript interactions. No paid UI kit, animation subscription or browser framework is required. Laravel and Dompdf licences are included with their packages. Original artwork permissions remain with the client.
+
+## Food stories / blogs
+
+Run `php artisan migrate --force` when updating an existing installation. The blog table is additive; existing products, customers and orders are preserved.
+
+Manage stories at `/admin/blogs`: write/edit, cover upload and alt text, category, author, introduction, body, optional source link and search metadata. New stories default to drafts. Check Publish to make a story public; Unpublish returns it to drafts. Public pages are `/blogs` and `/blogs/{slug}`, with search, category filtering and pagination. Homepage culinary stories use the latest published posts.
+
+Body content uses plain paragraphs separated by blank lines. A paragraph starting with `## ` becomes a heading. HTML is escaped. Keep slugs stable after publication; changing one changes its public URL. Cover images use the existing uploads storage and must be JPG/PNG/WebP up to 2 MB. Full articles and approved high-resolution covers remain client-provided. The local aloo-in-biryani story is a short editorial preview linking to the original, not a migration of the full Zappak article.
+
+Run `python tests/blogs.py` against the local preview server on port 8088 to check admin access, CSRF, publication visibility, filtering, escaping and unpublishing. The script removes its own test article afterward.
