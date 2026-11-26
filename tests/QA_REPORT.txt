@@ -138,3 +138,21 @@ INTRO / NEWSLETTER / LEGACY BRAND FOLLOW-UP
 - Brevo setup, sender/domain verification, newsletter sync and abandoned-cart
   events/reminders remain future integration work. Real order emails still
   need SMTP setup; dispatched/delivered notifications and retries are pending.
+
+HOSTINGER SMTP PREPARATION
+- Added HTML and plain-text order confirmations with item quantities/amounts,
+  subtotal, delivery, discounts, paid total, delivery address and private order link.
+- Verified captured payments send one confirmation to the order's customer;
+  rejected payments send none and duplicate captured callbacks do not resend.
+  Mail was faked: no real email was sent from these tests.
+- Prepared smtp.hostinger.com:465 with smtps and customercare@minitz.in as
+  username/sender. Local MAIL_MAILER remains log; mailbox password is missing.
+- deployment/hostinger-mail-setup.sh is a pasteable SSH setup block. It reads
+  the password with terminal echo disabled, verifies dotenv round-trip encoding,
+  backs up private .env, enables SMTP and submits a self-test to the same mailbox.
+- SSH key access is unavailable (publickey/password rejected in batch mode).
+  No remote SMTP settings were changed; the mailbox password and server-side
+  execution are still required. Check the self-test in Inbox/Spam before claiming
+  delivery. Live order emails require live payment mode, not STORE_DEMO=true.
+- Shipped/delivered emails, mail-failure retries and Brevo abandoned-cart
+  integration remain separate pending work.

@@ -84,7 +84,7 @@ class StoreController {
         $confirmed=DB::transaction(function()use($id,$payment){$o=DB::table('orders')->where('payment_order_id',$id)->lockForUpdate()->first();abort_unless($o&&($payment['order_id']??null)===$id&&($payment['amount']??-1)===$o->total&&($payment['currency']??'')==='INR',422);if(($payment['status']??'')==='captured'&&$o->status==='awaiting_payment'){DB::table('orders')->where('id',$o->id)->update(['status'=>'paid','payment_id'=>$payment['id'],'updated_at'=>now()]);return $o;}return null;});
         if($confirmed) DB::table('coupon_redemptions')->where('order_id',$confirmed->id)->where('status','reserved')->update(['status'=>'used','updated_at'=>now()]);
         if($confirmed&&!config('store.demo')) {
-            try { Mail::raw('Thank you for your Minitz order MZ-'.str_pad($confirmed->id,5,'0',STR_PAD_LEFT).'. Your payment of INR '.number_format($confirmed->total/100,2).' has been received. We will update you when your order is dispatched.',fn($m)=>$m->to($confirmed->email)->subject('Your Minitz order is confirmed')); }
+            try { Mail::to($confirmed->email)->send(new \App\Mail\OrderConfirmation($confirmed)); }
             catch(\Throwable $e){report($e);}
         }
     }
