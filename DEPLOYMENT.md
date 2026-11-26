@@ -133,3 +133,5 @@ The product editor keeps one primary cover and accepts multiple extra photos/inf
 Review submissions now use a display name, 1–5 stars, a description up to 500 characters and an optional image. The server persists the display name and review in the database, and optional photos in private storage. Published reviews without a photo show generated initials from the saved name. The internal title column is populated automatically for compatibility. Editing a review still resets its approval status; purchase verification and private-photo protection are unchanged.
 
 Empty text/number fields and textareas have field-specific example placeholders. These are low-opacity hints, not saved values; visible labels and validation remain in place. Native file, date and checkbox controls retain their appropriate native UI.
+
+Admin simplification: run migrations on deployment to standardize existing blog authors as Minitz Kitchen. New saves use that author automatically; blank blog links preserve existing slugs or generate a unique slug for a new story. Advanced product, blog SEO and website settings remain available in expandable groups.

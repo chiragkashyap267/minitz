@@ -17,7 +17,9 @@ class BlogController extends StoreController {
  public function editor(?int $id=null){$blog=$id?DB::table('blogs')->find($id):null;if($id)abort_unless($blog,404);return view('admin',$this->common()+['section'=>'blogs','editingBlog'=>true,'blog'=>$blog]);}
  public function save(Request $r,?int $id=null){
   $current=$id?DB::table('blogs')->find($id):null;if($id)abort_unless($current,404);
-  $d=$r->validate(['title'=>'required|string|max:160','slug'=>['nullable','string','max:180','regex:/^[a-z0-9]+(?:-[a-z0-9]+)*$/',Rule::unique('blogs')->ignore($id)],'category'=>'required|string|max:80','author'=>'required|string|max:100','excerpt'=>'required|string|max:1000','body'=>'required|string|max:60000','image_alt'=>'nullable|string|max:200','source_url'=>'nullable|url:http,https|max:1000','meta_title'=>'nullable|string|max:160','meta_description'=>'nullable|string|max:300']);
+  $d=$r->validate(['title'=>'required|string|max:160','slug'=>['nullable','string','max:180','regex:/^[a-z0-9]+(?:-[a-z0-9]+)*$/',Rule::unique('blogs')->ignore($id)],'category'=>'required|string|max:80','excerpt'=>'required|string|max:1000','body'=>'required|string|max:60000','image_alt'=>'nullable|string|max:200','source_url'=>'nullable|url:http,https|max:1000','meta_title'=>'nullable|string|max:160','meta_description'=>'nullable|string|max:300']);
+  $d['author']='Minitz Kitchen';
+  if(empty($d['slug'])&&$current)$d['slug']=$current->slug;
   if(empty($d['slug'])){$base=Str::slug($d['title'])?:'kitchen-story';$slug=substr($base,0,160);$suffix=1;while(DB::table('blogs')->where('slug',$slug)->when($id,fn($q)=>$q->where('id','!=',$id))->exists())$slug=substr($base,0,150).'-'.++$suffix;$d['slug']=$slug;}
   $d['active']=$r->boolean('active');$d['published_at']=$d['active']?($current?->published_at??now()):$current?->published_at;
   $d['image']=$this->image($r,$current?->image);if($r->boolean('remove_image')&&!$r->hasFile('image'))$d['image']=null;

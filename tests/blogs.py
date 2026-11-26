@@ -17,14 +17,19 @@ try:
  assert req(public,'/admin/blogs',{'title':'Unauthorized'})[2].endswith('/admin/login')
  assert req(admin,'/admin/login',{'email':'preview@minitz.test','password':'Minitz-Preview-Only-2026!'})[2].endswith('/admin')
  assert req(admin,'/admin/blogs')[0]==200
- data=dict(title='QA kitchen story',slug=slug,category='QA Stories',author='Local Test',excerpt='Local publishing check',body='## A kitchen heading\n\nA paragraph. <script>alert(1)</script>',meta_title='QA "><script>alert(2)</script>',meta_description='QA "><script>alert(3)</script>')
+ editor=req(admin,'/admin/blogs/new')[1]
+ assert 'name="author"' not in editor and 'name="slug"' not in editor
+ data=dict(title='QA kitchen story',slug=slug,category='QA Stories',excerpt='Local publishing check',body='## A kitchen heading\n\nA paragraph. <script>alert(1)</script>',meta_title='QA "><script>alert(2)</script>',meta_description='QA "><script>alert(3)</script>')
  _,html,url=req(admin,'/admin/blogs',data);assert '/edit' in url,url
  ident=db.execute('select id from blogs where slug=?',(slug,)).fetchone()[0]
+ assert db.execute('select author from blogs where id=?',(ident,)).fetchone()[0]=='Minitz Kitchen'
  assert req(public,'/blogs/'+slug)[0]==404
  assert slug not in req(public,'/blogs')[1]
  assert req(public,'/admin/blogs/'+str(ident)+'/archive',{})[2].endswith('/admin/login')
  assert req(admin,'/admin/blogs/'+str(ident),data,False)[0]==419
- assert req(admin,'/admin/blogs/'+str(ident),dict(data,active='1'))[0]==200
+ publish=dict(data,active='1');publish.pop('slug')
+ assert req(admin,'/admin/blogs/'+str(ident),publish)[0]==200
+ assert db.execute('select slug from blogs where id=?',(ident,)).fetchone()[0]==slug
  status,page,_=req(public,'/blogs/'+slug);assert status==200
  assert '<h2>A kitchen heading</h2>' in page
  assert '&lt;script&gt;alert(1)&lt;/script&gt;' in page and '<script>alert(' not in page
