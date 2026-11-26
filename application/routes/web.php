@@ -55,6 +55,7 @@ Route::middleware('admin')->group(function(){
  Route::post('/admin/blogs/{id?}',[B::class,'save'])->whereNumber('id');
  Route::post('/admin/blogs/{id}/archive',[B::class,'archive'])->whereNumber('id');
  Route::get('/admin/reports/{type}/{id?}',[S::class,'pdf'])->whereNumber('id');
+ Route::post('/admin/categories',[S::class,'saveCategory']);
  Route::post('/admin/products/{id?}',[S::class,'saveProduct'])->whereNumber('id');
  Route::post('/admin/recipes/{id?}',[S::class,'saveRecipe'])->whereNumber('id');
  Route::post('/admin/archive/{type}/{id}',[S::class,'deleteItem'])->whereNumber('id');

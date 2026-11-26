@@ -122,3 +122,14 @@ Product suggestion controls: choose Automatic, Choose products below, or Hide su
 
 
 Pricing: the product editor stores Selling price and optional MRP separately in paise. MRP below selling price is rejected. When MRP is higher, cards, product pages, homepage product chapters and related cards display crossed-out MRP and an automatic Sale badge. Equal or absent MRP does not show a sale. Cart and checkout continue to charge the selling price, before any coupon. Suggestion checkboxes switch to manual selection automatically; Save suggestions persists the product form.
+
+
+## Categories, seven-image editor and simplified reviews
+
+Run the additive migrations after any future deployment of this version. Product categories are persistent records; create one beside Add product, then choose it from the required product dropdown. Existing product categories are migrated automatically. New duplicate names are rejected regardless of letter case.
+
+The product editor keeps one primary cover and accepts multiple extra photos/infographics up to seven active image entries per product (JPG/PNG/WebP, 2 MB per file). The existing images appear in the editor and the public thumbnail strip. Archive an image in Gallery to replace it; gallery videos and video posters remain available through the Gallery editor. The seven-image limit applies to both editor uploads and the separate Gallery uploader. For batch uploads, set PHP post_max_size large enough for a cover plus seven photos; 32M is an appropriate starting point for the current limits.
+
+Review submissions now use a display name, 1–5 stars, a description up to 500 characters and an optional image. The server persists the display name and review in the database, and optional photos in private storage. Published reviews without a photo show generated initials from the saved name. The internal title column is populated automatically for compatibility. Editing a review still resets its approval status; purchase verification and private-photo protection are unchanged.
+
+Empty text/number fields and textareas have field-specific example placeholders. These are low-opacity hints, not saved values; visible labels and validation remain in place. Native file, date and checkbox controls retain their appropriate native UI.

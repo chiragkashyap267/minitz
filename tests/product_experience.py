@@ -1,7 +1,6 @@
 """Local integration checks for gallery uploads, private photo reviews and Buy now."""
 from pathlib import Path
 import sqlite3,uuid,re,io,json,http.cookiejar,urllib.request,urllib.parse,urllib.error
-from PIL import Image
 ROOT=Path(__file__).resolve().parents[1];BASE='http://127.0.0.1:8088';tag='QAEXP'+uuid.uuid4().hex[:8]
 def client():return urllib.request.build_opener(urllib.request.ProxyHandler({}),urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar()))
 def req(c,path,data=None,files=None,csrf=True):
@@ -20,7 +19,7 @@ def req(c,path,data=None,files=None,csrf=True):
  except urllib.error.HTTPError as e:return e.code,e.read().decode('utf-8',errors='replace'),e.url
 public=client();admin=client();cook=client();db=sqlite3.connect(ROOT/'application/database/database.sqlite');db.row_factory=sqlite3.Row;paths=[]
 p=db.execute("select * from products where slug='everyday-garam-masala'").fetchone();pid=p['id'];slug=p['slug'];product_path='/shop/'+slug
-png=io.BytesIO();Image.new('RGB',(40,40),'#ffe23f').save(png,format='PNG');photo={'photo':('review.png','image/png',png.getvalue())}
+png=io.BytesIO((ROOT/'assets/artwork-01.png').read_bytes());photo={'photo':('review.png','image/png',png.getvalue())}
 try:
  assert req(public,'/cart/buy-now',{'id':pid,'quantity':1})[2].endswith('/checkout')
  assert req(public,'/cart/buy-now',{'id':pid,'quantity':0})[0]!=500
@@ -37,7 +36,11 @@ try:
  assert req(public,'/products/'+str(pid)+'/reviews',{'rating':5,'title':tag,'body':'test'})[2].endswith('/account')
  req(cook,'/account/register',{'name':tag,'email':tag.lower()+'@example.test','password':'Preview-Testing-2026!','password_confirmation':'Preview-Testing-2026!'})
  customer=db.execute('select id from customers where email=?',(tag.lower()+'@example.test',)).fetchone();assert customer
- reviewdata={'rating':4,'title':tag,'body':'<script>unsafe()</script> A real local test.'}
+ reviewdata={'name':tag,'rating':4,'title':tag,'body':'<script>unsafe()</script> A real local test.'}
+ assert req(cook,'/products/'+str(pid)+'/reviews',reviewdata)[0]==200
+ initial=db.execute('select * from product_reviews where customer_id=?',(customer['id'],)).fetchone();assert initial['photo'] is None
+ req(admin,'/admin/reviews/'+str(initial['id']),{'status':'approved'})
+ assert 'class="review-initials"' in req(public,product_path)[1]
  assert req(cook,'/products/'+str(pid)+'/reviews',reviewdata,photo)[0]==200
  review=db.execute('select * from product_reviews where customer_id=?',(customer['id'],)).fetchone();assert review and review['status']=='pending' and not review['verified_purchase'];paths.append(ROOT/'application/storage/app/private/reviews'/review['photo'])
  rid=review['id'];assert tag not in req(public,product_path)[1]
@@ -64,6 +67,6 @@ finally:
  for row in db.execute('select path,poster from product_media where alt=?',(tag,)):
   for value in row:
    if value:paths.append(ROOT/'application/storage/app/public/uploads'/Path(value).name)
- db.execute('delete from orders where name=?',(tag,));db.execute('delete from product_media where alt=?',(tag,));db.execute('delete from product_reviews where title=?',(tag,));db.execute('delete from customers where email=?',(tag.lower()+'@example.test',));db.commit();db.close()
+ db.execute('delete from orders where name=?',(tag,));db.execute('delete from product_media where alt=?',(tag,));db.execute('delete from product_reviews where customer_id in (select id from customers where email=?)',(tag.lower()+'@example.test',));db.execute('delete from customers where email=?',(tag.lower()+'@example.test',));db.commit();db.close()
  for path in set(paths):
   if path.is_file():path.unlink()

@@ -24,6 +24,7 @@ class ProductExperienceController extends StoreController {
   $extensions=['image/jpeg'=>'jpg','image/png'=>'png','image/webp'=>'webp','video/mp4'=>'mp4','video/webm'=>'webm'];abort_unless(isset($extensions[$mime]),422);
   if($kind==='image')$r->validate(['media'=>'max:2048|dimensions:max_width=5000,max_height=5000']);
   if(DB::table('product_media')->where('product_id',$id)->where('active',true)->count()>=20)return back()->with('error','Archive an existing gallery item before adding more than 20 items.');
+  if($kind==='image'&&DB::table('product_media')->where('product_id',$id)->where('active',true)->where('kind','image')->count()>=7)return back()->with('error','Maximum 7 extra images per product. Archive an existing image first.');
   $name=Str::uuid().'.'.$extensions[$mime];$file->move(storage_path('app/public/uploads'),$name);
   $poster=$this->image($r,null,'poster');DB::table('product_media')->insert(['product_id'=>$id,'kind'=>$kind,'path'=>'media/'.$name,'poster'=>$poster,'alt'=>$d['alt']??'','position'=>$d['position'],'active'=>true,'created_at'=>now(),'updated_at'=>now()]);
   return back()->with('success','Gallery item saved.');
@@ -33,11 +34,11 @@ class ProductExperienceController extends StoreController {
  public function saveReview(Request $r,int $id){
   $customer=Cart::customer();if(!$customer)return redirect('/account')->with('error','Sign in to share your review.');
   abort_unless(DB::table('products')->where('id',$id)->where('active',true)->exists(),404);
-  $d=$r->validate(['rating'=>'required|integer|min:1|max:5','title'=>'required|string|max:120','body'=>'required|string|max:3000','photo'=>'nullable|file|mimes:jpg,jpeg,png,webp|max:2048|dimensions:max_width=4000,max_height=4000']);
+  $d=$r->validate(['name'=>'required|string|max:100','rating'=>'required|integer|min:1|max:5','body'=>'required|string|max:500','photo'=>'nullable|file|mimes:jpg,jpeg,png,webp|max:2048|dimensions:max_width=4000,max_height=4000']);
   $verified=false;foreach(DB::table('orders')->where('customer_id',$customer->id)->whereIn('status',['paid','processing','shipped','delivered'])->pluck('items') as $items)foreach(json_decode($items,true) as $item)if((int)$item['id']===$id)$verified=true;
   $old=DB::table('product_reviews')->where('product_id',$id)->where('customer_id',$customer->id)->first();$photo=$old?->photo;
   if($r->hasFile('photo')){$file=$r->file('photo');$ext=match($file->getMimeType()){'image/jpeg'=>'jpg','image/png'=>'png','image/webp'=>'webp',default=>abort(422)};$photo=Str::uuid().'.'.$ext;$file->move(storage_path('app/private/reviews'),$photo);}
-  DB::table('product_reviews')->updateOrInsert(['product_id'=>$id,'customer_id'=>$customer->id],['rating'=>$d['rating'],'title'=>$d['title'],'body'=>$d['body'],'photo'=>$photo,'status'=>'pending','verified_purchase'=>$verified,'created_at'=>$old?->created_at??now(),'updated_at'=>now()]);
+  DB::table('product_reviews')->updateOrInsert(['product_id'=>$id,'customer_id'=>$customer->id],['display_name'=>$d['name'],'rating'=>$d['rating'],'title'=>Str::limit($d['body'],100),'body'=>$d['body'],'photo'=>$photo,'status'=>'pending','verified_purchase'=>$verified,'created_at'=>$old?->created_at??now(),'updated_at'=>now()]);
   return back()->with('success','Your review is saved and awaiting approval. Editing a review sends it for approval again.');
  }
  public function reviewPhoto(int $id){$review=DB::table('product_reviews')->find($id);abort_unless($review&&$review->photo,404);abort_unless($review->status==='approved'||session('admin_authenticated')||Cart::customer()?->id===$review->customer_id,404);abort_unless(preg_match('/^[a-f0-9-]+\.(jpg|png|webp)$/D',$review->photo),404);$file=storage_path('app/private/reviews/'.$review->photo);abort_unless(is_file($file),404);return response()->file($file,['X-Content-Type-Options'=>'nosniff','Cache-Control'=>'private, no-store']);}
