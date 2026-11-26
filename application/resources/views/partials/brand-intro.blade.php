@@ -1,0 +1,1 @@
+<div id="minitz-intro" class="brand-intro" aria-hidden="true"><div class="intro-orbit intro-orbit-outer"></div><div class="intro-orbit intro-orbit-inner"></div><img class="intro-logo" src="/assets/brand/logo.png" alt="" width="230" height="85" fetchpriority="high"></div>

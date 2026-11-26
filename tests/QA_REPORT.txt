@@ -109,3 +109,32 @@ FOLLOW-UP CHECKS — 26 November 2026
   product/review integration checks passed after these changes.
 - All temporary visual-review fixtures were removed. No live Shiprocket,
   payment, pickup or outbound message was created during this work.
+
+INTRO / NEWSLETTER / LEGACY BRAND FOLLOW-UP
+- Public blue splash with white Minitz logo and circular arcs; 1.95 second hold
+  after DOM readiness plus 0.55 second blur/fade. Browser verified the splash
+  appears on reload, removes itself, and skips subsequent internal navigation.
+  Reduced-motion visitors skip it; Escape/Tab/pointer can dismiss it. Admin
+  layout does not include it. Public Coming Soon gate is unchanged.
+- Price card uses lightweight inline bowl/chilli/herb SVG doodles. Mobile
+  width checked at 390px with 375px document width and no horizontal overflow.
+- Newsletter popup appears after 9 seconds on browsing pages, skips checkout,
+  cart/account/order/newsletter pages, and defers while another dialog is open.
+  Close records a seven-day cooldown; successful signup suppresses future auto
+  opening on that browser. Footer link allows manual opening.
+- Consent is required, name optional, emails lowercased and deduplicated.
+  Signups and consent timestamps persist in newsletter_subscribers. Provider
+  status remains pending: no Brevo API/SMTP or outbound email is active.
+- Private admin subscriber list and streaming CSV export checked. CSV prefixes
+  formula-like fields. Fixed admin middleware to support streamed responses
+  while retaining Cache-Control: no-store, private on all admin responses.
+- Automated checks passed: newsletter validation/consent/CSRF/deduplication/
+  storage/list/export; full admin editing checks; MRP/pricing checks.
+- A real browser popup submission displayed success and was found in the DB.
+  Its disposable subscriber was then removed. Mobile popup fits within 390px.
+- Existing Zappak support email/phone and paraphrased About/founder copy import
+  only into empty or known placeholder settings. Custom admin edits survive.
+  Sources: https://www.zappak.in/ and https://www.zappak.in/about
+- Brevo setup, sender/domain verification, newsletter sync and abandoned-cart
+  events/reminders remain future integration work. Real order emails still
+  need SMTP setup; dispatched/delivered notifications and retries are pending.

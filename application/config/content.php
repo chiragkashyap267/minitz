@@ -75,6 +75,10 @@ All the credit to you.'],
 'founders_heading_accent'=>['Heading second line','And a little curiosity.'],
 'founders_intro'=>['Introduction','Anupam brings an ear for balance. Dilip brings a drummer’s sense of timing. Minitz grew out of their time cooking and making music together.'],
 ],
+'Newsletter popup'=>[
+'newsletter_heading'=>['Heading','Good things from the kitchen.'],
+'newsletter_text'=>['Description','Recipes, food stories and little Minitz updates, straight to your inbox.'],
+],
 'Help and support section'=>[
 'help_heading'=>['Heading','Need help?'],
 'help_text'=>['Description','Questions about a blend or your order? We’re happy to help.'],

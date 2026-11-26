@@ -5,6 +5,8 @@ use Illuminate\Http\Request;
 class AdminOnly {
     public function handle(Request $request, Closure $next) {
         if (!$request->session()->get('admin_authenticated')) return redirect('/admin/login');
-        return $next($request)->header('Cache-Control','no-store, private');
+        $response=$next($request);
+        $response->headers->set('Cache-Control','no-store, private');
+        return $response;
     }
 }
