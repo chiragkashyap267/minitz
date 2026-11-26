@@ -10,5 +10,7 @@ $key='deployment_probe_'.bin2hex(random_bytes(10));
 try {DB::table('settings')->insert(['key'=>$key,'value'=>'storage-test']);DB::purge();if(DB::table('settings')->where('key',$key)->value('value')!=='storage-test')throw new RuntimeException('Database persistence failed.');echo "DATABASE persistent write/read OK\n";}
 finally {DB::table('settings')->where('key',$key)->delete();}
 foreach(['app/public/uploads','app/private/reviews','framework/sessions','framework/views','logs','../bootstrap/cache'] as $dir){$path=storage_path($dir);if(!is_dir($path)&&!mkdir($path,0755,true)&&!is_dir($path))throw new RuntimeException('Cannot create directory');$probe=$path.'/deployment-probe-'.bin2hex(random_bytes(8));try{if(file_put_contents($probe,'minitz-storage-check')===false||file_get_contents($probe)!=='minitz-storage-check')throw new RuntimeException('Storage read/write failed: '.$dir);echo 'STORAGE OK '.$dir.PHP_EOL;}finally{if(is_file($probe))unlink($probe);}}
+view()->share('errors',new Illuminate\Support\ViewErrorBag);
+$html=(new App\Http\Controllers\StoreController)->home()->render();if(!str_contains($html,'class="hero'))throw new RuntimeException('Homepage failed to render');echo "HOMEPAGE render OK\n";
 echo 'UPLOAD PHP limits: '.ini_get('upload_max_filesize').' / '.ini_get('post_max_size').PHP_EOL;
 echo "PASS database and file storage checks. Test uploads and checkout through authenticated preview as well.\n";
