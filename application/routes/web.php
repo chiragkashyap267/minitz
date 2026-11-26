@@ -3,6 +3,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\StoreController as S;
 use App\Http\Controllers\CommerceController as C;
 use App\Http\Controllers\BlogController as B;
+use App\Http\Controllers\ProductExperienceController as P;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Cache\RateLimiting\Limit;
 foreach(['cart'=>60,'checkout'=>10,'admin-login'=>5,'customer-auth'=>10,'payments'=>20,'webhook'=>120] as $name=>$limit) {
@@ -10,7 +11,10 @@ foreach(['cart'=>60,'checkout'=>10,'admin-login'=>5,'customer-auth'=>10,'payment
 }
 Route::get('/',[S::class,'home']);
 Route::get('/shop',[S::class,'shop']);
-Route::get('/shop/{slug}',[S::class,'product']);
+Route::get('/shop/{slug}',[P::class,'detail']);
+RateLimiter::for('reviews',fn(\Illuminate\Http\Request $r)=>Limit::perMinute(5)->by('review|'.(session('customer_id')??$r->ip())));
+Route::post('/products/{id}/reviews',[P::class,'saveReview'])->whereNumber('id')->middleware('throttle:reviews');
+Route::get('/review-media/{id}',[P::class,'reviewPhoto'])->whereNumber('id');
 Route::get('/blogs',[B::class,'index']);
 Route::get('/blogs/{slug}',[B::class,'show']);
 Route::get('/recipes',[S::class,'recipes']);
@@ -27,6 +31,7 @@ Route::get('/cart/drawer',[C::class,'drawer']);
 Route::post('/cart/coupon',[C::class,'applyCoupon'])->middleware('throttle:cart');
 Route::post('/cart/coupon/remove',[C::class,'removeCoupon']);
 Route::post('/cart/add',[S::class,'add'])->middleware('throttle:cart');
+Route::post('/cart/buy-now',[S::class,'buyNow'])->middleware('throttle:cart');
 Route::post('/cart/update',[S::class,'updateCart']);
 Route::get('/checkout',[S::class,'checkout']);
 Route::post('/checkout',[S::class,'placeOrder'])->middleware('throttle:checkout');
@@ -38,6 +43,12 @@ Route::post('/admin/login',[S::class,'authenticate'])->middleware('throttle:admi
 Route::middleware('admin')->group(function(){
  Route::post('/admin/logout',[S::class,'logout']);
  Route::get('/admin',[S::class,'admin']);
+ Route::get('/admin/reviews',[P::class,'reviewsAdmin']);
+ Route::post('/admin/reviews/{id}',[P::class,'moderate'])->whereNumber('id');
+ Route::get('/admin/products/{id}/media',[P::class,'mediaEditor'])->whereNumber('id');
+ Route::post('/admin/products/{id}/media',[P::class,'addMedia'])->whereNumber('id');
+ Route::post('/admin/products/{id}/media/{media}',[P::class,'updateMedia'])->whereNumber(['id','media']);
+ Route::post('/admin/products/{id}/media/{media}/archive',[P::class,'archiveMedia'])->whereNumber(['id','media']);
  Route::get('/admin/blogs',[B::class,'dashboard']);
  Route::get('/admin/blogs/new',[B::class,'editor']);
  Route::get('/admin/blogs/{id}/edit',[B::class,'editor'])->whereNumber('id');

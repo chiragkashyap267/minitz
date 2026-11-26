@@ -8,6 +8,16 @@
     targets.forEach((node, i) => { node.classList.add('appear-ready'); node.style.setProperty('--appear-delay', `${i % 3 * 55}ms`); observer.observe(node); });
     preference.addEventListener('change', () => { if (preference.matches) { targets.forEach(node => node.classList.add('appear-visible')); observer.disconnect(); } });
   }
+  document.addEventListener('click', event => {
+    const button = event.target.closest('[data-load-youtube]');
+    if (!button || !/^[A-Za-z0-9_-]{11}$/.test(button.dataset.youtubeId || '')) return;
+    const iframe = document.createElement('iframe');
+    iframe.src = `https://www.youtube-nocookie.com/embed/${button.dataset.youtubeId}?autoplay=1&playsinline=1&rel=0`;
+    iframe.title = button.dataset.youtubeTitle || 'Minitz TV broadcast';
+    iframe.allow = 'autoplay; encrypted-media; picture-in-picture; fullscreen';
+    iframe.allowFullscreen = true; iframe.referrerPolicy = 'strict-origin-when-cross-origin';
+    iframe.className = 'tv-live-frame'; button.replaceWith(iframe); iframe.focus();
+  });
   const story = document.querySelector('[data-paper-tale]');
   if (!story) return;
   const steps = [...story.querySelectorAll('[data-tale-step]')];

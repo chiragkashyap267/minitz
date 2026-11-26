@@ -72,6 +72,7 @@
   });
   document.addEventListener('submit', async event => {
     const form = event.target;
+    if (event.submitter?.hasAttribute('data-buy-now')) return;
     const isAdd = form.matches('form[action="/cart/add"]');
     const isCart = form.matches('[data-cart-form]');
     if (!drawer || (!isAdd && !isCart) || document.body.hasAttribute('data-static-preview')) return;

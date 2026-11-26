@@ -1,0 +1,1 @@
+<div class="product-pricing">@if(mz_on_sale($product))<del><span class="sr-only">MRP </span>{{ mz_money($product->compare_price) }}</del>@endif<strong><span class="sr-only">Selling price </span>{{ mz_money($product->price) }}</strong></div>

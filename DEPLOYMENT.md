@@ -28,7 +28,8 @@ From the website root:
 ```sh
 cd application
 php prepare.php
-composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction
+composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction --no-scripts
+php artisan package:discover --ansi
 cp .env.example .env
 ```
 
@@ -91,6 +92,33 @@ Run `php artisan migrate --force` when updating an existing installation. The bl
 
 Manage stories at `/admin/blogs`: write/edit, cover upload and alt text, category, author, introduction, body, optional source link and search metadata. New stories default to drafts. Check Publish to make a story public; Unpublish returns it to drafts. Public pages are `/blogs` and `/blogs/{slug}`, with search, category filtering and pagination. Homepage culinary stories use the latest published posts.
 
-Body content uses plain paragraphs separated by blank lines. A paragraph starting with `## ` becomes a heading. HTML is escaped. Keep slugs stable after publication; changing one changes its public URL. Cover images use the existing uploads storage and must be JPG/PNG/WebP up to 2 MB. Full articles and approved high-resolution covers remain client-provided. The local aloo-in-biryani story is a short editorial preview linking to the original, not a migration of the full Zappak article.
+Body content uses plain paragraphs separated by blank lines. A paragraph starting with `## ` becomes a heading. HTML is escaped. Keep slugs stable after publication; changing one changes its public URL. Cover images use the existing uploads storage and must be JPG/PNG/WebP up to 2 MB. Full articles and approved high-resolution covers remain client-provided. Existing published source articles are now imported with LegacyBlogSeeder; the original short local preview is unpublished when unchanged.
 
 Run `python tests/blogs.py` against the local preview server on port 8088 to check admin access, CSRF, publication visibility, filtering, escaping and unpublishing. The script removes its own test article afterward.
+
+
+## Product galleries, bestsellers and customer reviews
+
+After deploying this version, run `php prepare.php` and `php artisan migrate --force` from `application`. Do not regenerate an existing APP_KEY or replace the server .env, storage directories or database. The new migration adds gallery/review tables and product merchandising fields.
+
+`/admin/products` controls category, stock, price, homepage bestseller flag, featured order and manual related products (up to 8). The homepage shows up to 8 selected active bestsellers. `/shop` lists every active product with category/search/price sorting and 12 products per page. Product pages show up to 4 related products, chosen from the manual selection or automatically prioritising the category.
+
+Each product's Gallery link opens `/admin/products/{id}/media`. Add up to 20 gallery entries; JPG/PNG/WebP photos up to 2 MB, MP4/WebM clips up to 25 MB and optional video thumbnail posters up to 2 MB. Set display order and descriptions or archive an item. Archived files remain on disk. Set PHP upload_max_filesize to at least 25M and post_max_size above the total upload payload (for example 32M).
+
+Signed-in customers can save one rating/review per product and an optional photo. Edits return the review to pending status. Admin approves/rejects reviews in `/admin/reviews`. Only approved reviews contribute to public ratings. A verified purchase badge requires a matching paid/processing/shipped/delivered order; preview orders never qualify. Review photos live in `storage/app/private/reviews` and are served through an access-controlled route. Pending/rejected photos are visible only to their author or an authenticated admin. Back up this directory, public uploads and the database together.
+
+## Existing blog migration and editable content
+
+`php artisan db:seed --class=LegacyBlogSeeder --force` adds the 12 published source articles and their covers from the client's Zappak site, retaining original slugs/dates and source references. The seeder inserts only missing slugs, preserving existing admin edits. The old local short preview article is unpublished only when it still contains its original sample introduction. Articles and images remain editable in `/admin/blogs`.
+
+`/admin/content` also edits the homepage section copy, chapter descriptions/dialogues, FAQ, Mini/Nitz biographies, food-story headings, TV introduction, community text, footer invitation and two additional section-artwork slots. This uses persistent settings and config defaults; visual layout remains in source code.
+
+## Minitz TV broadcasts
+
+Use YouTube Live for broadcasting; paste the individual HTTPS video/live link and title in `/admin/content`, then enable the homepage broadcast player. The website loads the embedded player only when the visitor presses Play. Allow embedding in YouTube and test the owner's eligible channel before a real event. A session URL supports its scheduled event, live stream and replay; each new broadcast URL must be selected in admin. Automatic channel-live detection is not implemented. No stream keys or YouTube account credentials are stored by the website. Hostinger serves the site; YouTube handles the live video distribution.
+
+
+Product suggestion controls: choose Automatic, Choose products below, or Hide suggestions in the product editor. Tick/untick related products using checkboxes and set the visible count from 1 to 8. Empty manual selection shows no related items; Hide removes the section entirely. Existing explicit selections are preserved as manual mode by the additive migration. Admin product rows now use the same main-photo source as the storefront, with a placeholder when no image exists.
+
+
+Pricing: the product editor stores Selling price and optional MRP separately in paise. MRP below selling price is rejected. When MRP is higher, cards, product pages, homepage product chapters and related cards display crossed-out MRP and an automatic Sale badge. Equal or absent MRP does not show a sale. Cart and checkout continue to charge the selling price, before any coupon. Suggestion checkboxes switch to manual selection automatically; Save suggestions persists the product form.

@@ -12,28 +12,30 @@ use Dompdf\Dompdf;
 use App\Services\Cart;
 
 class StoreController {
-    public function settings():array { return DB::table('settings')->pluck('value','key')->all(); }
+    public function settings():array { $defaults=[];foreach(config('content',[]) as $fields)foreach($fields as $key=>$field)$defaults[$key]=$field[1];return array_replace($defaults,DB::table('settings')->pluck('value','key')->all()); }
     protected function common():array { $cartSummary=Cart::summary();return ['settings'=>$this->settings(),'cartCount'=>$cartSummary['count'],'cartSummary'=>$cartSummary,'customer'=>Cart::customer(),'demo'=>config('store.demo')]; }
     protected function cartResponse(?string $message=null) { $data=$this->common();return response()->json(['html'=>view('partials.cart-drawer-content',$data+$data['cartSummary'])->render(),'count'=>$data['cartCount'],'message'=>$message])->header('Cache-Control','no-store, private'); }
-    public function home() { return view('home',$this->common()+['blogs'=>DB::table('blogs')->where('active',true)->where('published_at','<=',now())->orderByDesc('published_at')->limit(3)->get(),'products'=>DB::table('products')->where('active',true)->limit(4)->get(),'recipes'=>DB::table('recipes')->where('active',true)->limit(3)->get(),'videos'=>DB::table('testimonials')->where('active',true)->get()]); }
+    public function home() { return view('home',$this->common()+['blogs'=>DB::table('blogs')->where('active',true)->where('published_at','<=',now())->orderByDesc('published_at')->limit(3)->get(),'products'=>DB::table('products')->where('active',true)->where('is_bestseller',true)->orderBy('featured_rank')->orderBy('id')->limit(8)->get(),'recipes'=>DB::table('recipes')->where('active',true)->limit(3)->get(),'videos'=>DB::table('testimonials')->where('active',true)->get()]); }
     public function shop(Request $r) {
         $q=DB::table('products')->where('active',true);
         if($r->filled('q')) $q->where('name','like','%'.mb_substr($r->string('q'),0,100).'%');
         if($r->filled('category')) $q->where('category',$r->string('category'));
-        $sort=$r->get('sort'); if($sort==='price-low')$q->orderBy('price'); elseif($sort==='price-high')$q->orderByDesc('price'); else $q->orderBy('id');
-        return view('shop',$this->common()+['products'=>$q->get(),'categories'=>DB::table('products')->where('active',true)->distinct()->pluck('category')]);
+        $sort=$r->get('sort'); if($sort==='price-low')$q->orderBy('price'); elseif($sort==='price-high')$q->orderByDesc('price'); else $q->orderByDesc('is_bestseller')->orderBy('featured_rank')->orderBy('id');
+        return view('shop',$this->common()+['products'=>$q->paginate(12)->withQueryString(),'categories'=>DB::table('products')->where('active',true)->distinct()->pluck('category')]);
     }
     public function product(string $slug){$product=DB::table('products')->where('slug',$slug)->where('active',true)->first();abort_unless($product,404);return view('product',$this->common()+compact('product'));}
     public function recipes(){return view('recipes',$this->common()+['recipes'=>DB::table('recipes')->where('active',true)->get()]);}
     public function recipe(string $slug){$recipe=DB::table('recipes')->where('slug',$slug)->where('active',true)->first();abort_unless($recipe,404);return view('recipe',$this->common()+compact('recipe'));}
     public function page(string $page){abort_unless(in_array($page,['about','contact','privacy','terms','shipping','returns','payment']),404);return view('page',$this->common()+compact('page'));}
     public function media(string $file){abort_unless(preg_match('/^[a-f0-9-]+\.(webp|png|jpg|mp4|webm)$/',$file),404);$path=storage_path('app/public/uploads/'.$file);abort_unless(is_file($path),404);return response()->file($path,['X-Content-Type-Options'=>'nosniff']);}
-    public function add(Request $r){
+    public function add(Request $r){ return $this->storeCartItem($r,false); }
+    public function buyNow(Request $r){ return $this->storeCartItem($r,true); }
+    private function storeCartItem(Request $r,bool $checkout){
         $data=$r->validate(['id'=>'required|integer','quantity'=>'required|integer|min:1|max:20']);
         $p=DB::table('products')->where('id',$data['id'])->where('active',true)->first();abort_unless($p,404);
         $cart=session('cart',[]);$qty=($cart[$p->id]??0)+$data['quantity'];
         if($qty>min(20,$p->stock)){if($r->expectsJson())return response()->json(['message'=>'That quantity is not available.'],422);return back()->with('error','That quantity is not available.');}
-        $cart[$p->id]=$qty;session(['cart'=>$cart]);return $r->expectsJson()?$this->cartResponse('A little flavour added to your bag.'):back()->with('success','A little flavour added to your bag.');
+        $cart[$p->id]=$qty;session(['cart'=>$cart]);if($checkout)return redirect('/checkout');return $r->expectsJson()?$this->cartResponse('A little flavour added to your bag.'):back()->with('success','A little flavour added to your bag.');
     }
     public function updateCart(Request $r){
         $data=$r->validate(['quantities'=>'required|array','quantities.*'=>'required|integer|min:0|max:20']);$cart=[];
@@ -95,21 +97,26 @@ class StoreController {
         $orders=DB::table('orders')->when($r->filled('q'),fn($q)=>$q->where(fn($q)=>$q->where('name','like','%'.$r->string('q').'%')->orWhere('email','like','%'.$r->string('q').'%')))->orderByDesc('id')->paginate(15)->withQueryString();
         return view('admin',$this->common()+['coupons'=>DB::table('coupons')->orderByDesc('id')->get(),'couponUsage'=>DB::table('coupon_redemptions')->whereIn('status',['used','reserved'])->select('coupon_id',DB::raw('COUNT(*) as count'))->groupBy('coupon_id')->pluck('count','coupon_id'),'videoCards'=>DB::table('testimonials')->get(),'section'=>$section,'products'=>DB::table('products')->orderBy('id')->get(),'recipes'=>DB::table('recipes')->get(),'orders'=>$orders,'customers'=>DB::table('orders')->select('email','name',DB::raw('COUNT(*) as order_count'),DB::raw('MAX(created_at) as last_order'))->groupBy('email','name')->paginate(15),'stats'=>['orders'=>DB::table('orders')->count(),'revenue'=>DB::table('orders')->whereIn('status',['paid','processing','shipped','delivered'])->sum('total'),'customers'=>DB::table('orders')->distinct()->count('email'),'low_stock'=>DB::table('products')->where('stock','<',5)->count()]]);
     }
-    protected function image(Request $r,?string $current):?string {
-        if(!$r->hasFile('image'))return $current;
-        $r->validate(['image'=>'file|mimes:jpg,jpeg,png,webp|max:2048|dimensions:max_width=5000,max_height=5000']);
-        $file=$r->file('image');$ext=match($file->getMimeType()){'image/jpeg'=>'jpg','image/png'=>'png','image/webp'=>'webp',default=>abort(422)};
+    protected function image(Request $r,?string $current,string $field='image'):?string {
+        if(!$r->hasFile($field))return $current;
+        $r->validate([$field=>'file|mimes:jpg,jpeg,png,webp|max:2048|dimensions:max_width=5000,max_height=5000']);
+        $file=$r->file($field);$ext=match($file->getMimeType()){'image/jpeg'=>'jpg','image/png'=>'png','image/webp'=>'webp',default=>abort(422)};
         $name=Str::uuid().'.'.$ext;$file->move(storage_path('app/public/uploads'),$name);return 'media/'.$name;
     }
     public function saveProduct(Request $r,?int $id=null){
         $current=$id?DB::table('products')->find($id):null;if($id)abort_unless($current,404);
-        $d=$r->validate(['name'=>'required|string|max:100','sku'=>['required','string','max:60',Rule::unique('products')->ignore($id)],'category'=>'required|string|max:60','price'=>'required|numeric|min:1|max:100000','weight'=>'required|string|max:40','description'=>'required|string|max:4000','ingredients'=>'nullable|string|max:4000','allergens'=>'nullable|string|max:2000','colour'=>['required',Rule::in(['orange','blue','green','lilac'])],'stock'=>'required|integer|min:0|max:100000']);
-        $d['price']=(int)round($d['price']*100);$d['slug']=$current->slug??Str::slug($d['name']).'-'.Str::lower(Str::random(5));$d['active']=$r->boolean('active');$d['image']=$this->image($r,$current->image??null);$d['updated_at']=now();if($id)DB::table('products')->where('id',$id)->update($d);else DB::table('products')->insert($d+['created_at'=>now()]);return redirect('/admin/products')->with('success','Product saved.');
+        $d=$r->validate(['name'=>'required|string|max:100','sku'=>['required','string','max:60',Rule::unique('products')->ignore($id)],'category'=>'required|string|max:60','price'=>'required|numeric|min:1|max:100000','compare_price'=>'nullable|numeric|min:1|max:100000|gte:price','weight'=>'required|string|max:40','description'=>'required|string|max:4000','ingredients'=>'nullable|string|max:4000','allergens'=>'nullable|string|max:2000','colour'=>['required',Rule::in(['orange','blue','green','lilac'])],'stock'=>'required|integer|min:0|max:100000']);
+        $extra=$r->validate(['suggestion_mode'=>'nullable|in:auto,manual,hidden','related_display_limit'=>'nullable|integer|min:1|max:8','is_bestseller'=>'nullable|boolean','featured_rank'=>'nullable|integer|min:0|max:10000','related_product_ids'=>'nullable|array|max:8','related_product_ids.*'=>'integer|distinct|exists:products,id']);$d['suggestion_mode']=$extra['suggestion_mode']??$current->suggestion_mode??'auto';$d['related_display_limit']=$extra['related_display_limit']??$current->related_display_limit??4;$d['is_bestseller']=$r->boolean('is_bestseller');$d['featured_rank']=$extra['featured_rank']??0;$d['related_product_ids']=json_encode(array_values(array_filter($extra['related_product_ids']??[],fn($related)=>(int)$related!==$id)));$d['compare_price']=isset($d['compare_price'])?(int)round($d['compare_price']*100):null;$d['price']=(int)round($d['price']*100);$d['slug']=$current->slug??Str::slug($d['name']).'-'.Str::lower(Str::random(5));$d['active']=$r->boolean('active');$d['image']=$this->image($r,$current->image??null);$d['updated_at']=now();if($id)DB::table('products')->where('id',$id)->update($d);else DB::table('products')->insert($d+['created_at'=>now()]);return redirect('/admin/products')->with('success','Product saved.');
     }
     public function saveRecipe(Request $r,?int $id=null){$current=$id?DB::table('recipes')->find($id):null;if($id)abort_unless($current,404);$d=$r->validate(['title'=>'required|string|max:100','category'=>'required|string|max:60','minutes'=>'required|integer|min:1|max:1440','servings'=>'required|integer|min:1|max:100','description'=>'required|string|max:4000','ingredients'=>'required|string|max:8000','steps'=>'required|string|max:12000']);$d['slug']=$current->slug??Str::slug($d['title']).'-'.Str::lower(Str::random(5));$d['active']=$r->boolean('active');$d['image']=$this->image($r,$current->image??null);$d['updated_at']=now();if($id)DB::table('recipes')->where('id',$id)->update($d);else DB::table('recipes')->insert($d+['created_at'=>now()]);return redirect('/admin/recipes')->with('success','Recipe saved.');}
     public function deleteItem(Request $r,string $type,int $id){abort_unless(in_array($type,['products','recipes']),404);DB::table($type)->where('id',$id)->update(['active'=>false,'updated_at'=>now()]);return back()->with('success','Item archived.');}
     public function saveContent(Request $r){
         $d=$r->validate(['announcement'=>'required|string|max:200','hero_heading'=>'required|string|max:100','hero_text'=>'required|string|max:500','about_heading'=>'required|string|max:150','about_text'=>'required|string|max:3000','support_email'=>'nullable|email|max:150','support_phone'=>'nullable|string|max:30','whatsapp'=>'nullable|regex:/^[0-9]{10,15}$/','instagram'=>'nullable|url:https|max:300','facebook'=>'nullable|url:https|max:300','youtube'=>'nullable|url:https|max:300','shipping_paise'=>'required|integer|min:0|max:100000','free_shipping_paise'=>'required|integer|min:0|max:10000000']);
+        $copyRules=[];foreach(config('content',[]) as $fields)foreach($fields as $key=>$field)$copyRules[$key]='nullable|string|max:10000';$d+=$r->validate($copyRules);
+        foreach(['story_art','blog_mascot'] as $slot)if($r->hasFile('content_images.'.$slot))$d[$slot]=$this->image($r,$this->settings()[$slot]??null,'content_images.'.$slot);
+        $tv=$r->validate(['tv_video_url'=>['nullable','string','max:500',function($attribute,$value,$fail){if($value&&!\App\Services\YouTube::videoId($value))$fail('Use a valid HTTPS YouTube video or live broadcast link.');}],'tv_title'=>'nullable|string|max:160','tv_enabled'=>'nullable|boolean']);
+        if($r->boolean('tv_enabled')&&empty($tv['tv_video_url']))throw \Illuminate\Validation\ValidationException::withMessages(['tv_video_url'=>'Add the YouTube broadcast link before showing the player.']);
+        $d+=['tv_video_url'=>$tv['tv_video_url']??'','tv_video_id'=>\App\Services\YouTube::videoId($tv['tv_video_url']??'')??'','tv_title'=>$tv['tv_title']??'','tv_enabled'=>$r->boolean('tv_enabled')?'1':'0'];
         $image=$this->image($r,$this->settings()['hero_image']??null);if($image)$d['hero_image']=$image;
         foreach(['privacy','terms','shipping','returns','payment'] as $policy){$key='policy_'.$policy;$r->validate([$key=>'nullable|string|max:20000']);$d[$key]=$r->input($key,'');}
         foreach($d as $key=>$value)DB::table('settings')->updateOrInsert(compact('key'),['value'=>$value??'']);return back()->with('success','Website content saved.');

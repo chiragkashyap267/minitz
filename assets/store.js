@@ -22,3 +22,14 @@ if ('IntersectionObserver' in window && !matchMedia('(prefers-reduced-motion: re
   const observer = new IntersectionObserver(entries => entries.forEach(entry => { if (entry.isIntersecting) { entry.target.classList.add('in-view'); observer.unobserve(entry.target); } }), { threshold: 0.08 });
   document.querySelectorAll('.reveal').forEach(element => observer.observe(element));
 } else document.querySelectorAll('.reveal').forEach(element => element.classList.add('in-view'));
+
+document.addEventListener('change', event => {
+  if (event.target.name !== 'related_product_ids[]') return;
+  const group = event.target.closest('[data-suggestion-options]');
+  if (!group) return;
+  const mode = group.closest('form').querySelector('[name="suggestion_mode"]');
+  if (mode) mode.value = 'manual';
+  const count = group.querySelectorAll('input[type="checkbox"]:checked').length;
+  const status = group.closest('form').querySelector('[data-selection-count]');
+  if (status) status.textContent = `${count} selected${count > 8 ? ' — choose up to 8' : ''}`;
+});
