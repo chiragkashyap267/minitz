@@ -4,13 +4,15 @@ use App\Http\Controllers\StoreController as S;
 use App\Http\Controllers\CommerceController as C;
 use App\Http\Controllers\BlogController as B;
 use App\Http\Controllers\CommunityController as U;
+use App\Http\Controllers\ContactController as F;
 use App\Http\Controllers\ProductExperienceController as P;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Cache\RateLimiting\Limit;
-foreach(['cart'=>60,'checkout'=>10,'admin-login'=>5,'customer-auth'=>10,'payments'=>20,'webhook'=>120] as $name=>$limit) {
+foreach(['cart'=>60,'checkout'=>10,'admin-login'=>5,'customer-auth'=>10,'payments'=>20,'webhook'=>120,'contact'=>5] as $name=>$limit) {
  RateLimiter::for($name,fn(\Illuminate\Http\Request $r)=>Limit::perMinute($limit)->by($name.'|'.$r->ip()));
 }
 Route::get('/',[S::class,'home']);
+Route::post('/contact',[F::class,'save'])->middleware('throttle:contact');
 Route::get('/shop',[S::class,'shop']);
 Route::get('/shop/{slug}',[P::class,'detail']);
 RateLimiter::for('reviews',fn(\Illuminate\Http\Request $r)=>Limit::perMinute(5)->by('review|'.(session('customer_id')??$r->ip())));
@@ -46,6 +48,7 @@ Route::post('/admin/login',[S::class,'authenticate'])->middleware('throttle:admi
 Route::middleware('admin')->group(function(){
  Route::post('/admin/logout',[S::class,'logout']);
  Route::get('/admin',[S::class,'admin']);
+ Route::get('/admin/messages',[F::class,'dashboard']);
  Route::get('/admin/community',[U::class,'dashboard']);
  Route::post('/admin/community/{id}',[U::class,'visibility'])->whereNumber('id');
  Route::get('/admin/reviews',[P::class,'reviewsAdmin']);
