@@ -1,1 +1,3 @@
 document.addEventListener('click',event=>{const button=event.target.closest('[data-community-pause]');if(!button)return;const marquee=button.closest('.community-marquee-panel').querySelector('[data-community-marquee]');const paused=marquee.classList.toggle('is-paused');button.setAttribute('aria-pressed',String(paused));button.textContent=paused?'Resume photos':'Pause photos';});
+
+document.addEventListener('click',event=>{const button=event.target.closest('[data-reviews-pause]');if(!button)return;const marquee=button.closest('.home-reviews').querySelector('.home-review-marquee');const paused=marquee.classList.toggle('is-paused');button.setAttribute('aria-pressed',String(paused));button.textContent=paused?'Resume reviews':'Pause reviews';});

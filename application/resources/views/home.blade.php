@@ -30,6 +30,8 @@
   </div></div>
 </section>
 @include('partials.brand-world')
+@include('partials.home-reviews')
 <section class="community-section section community-flow community-sharing" id="made-by-you"><div class="community-left"><div class="community-heading"><span class="eyebrow">{{ $settings['community_eyebrow'] }}</span><h2>{{ $settings['community_heading'] }} <em>{{ $settings['community_heading_accent'] }}</em></h2></div>@include('partials.community-upload')</div><div class="community-right">@if($communityPhotos->isNotEmpty())@include('partials.community-marquee')@endif @include('partials.mascot',['pose'=>'welcome','words'=>$settings['community_bubble']])</div></section>
 <section class="section home-contact"><div><span class="eyebrow">FROM YOUR KITCHEN TO OURS</span><h2>A little hello.<br>A good conversation.</h2><p>We’re here for your questions, ideas and food stories.</p></div>@include('partials.contact-form',['source'=>'home'])</section>
+@include('partials.need-help')
 @endsection

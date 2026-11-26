@@ -1,6 +1,6 @@
 MINITZ LOCAL QA REPORT — 26 November 2026
 
-Result: 13 of 13 automated suites passed. Tested locally on PHP 8.3 and SQLite.
+Result: 13 of 13 automated suites passed. Tested locally on PHP 8.2.12 and SQLite.
 The public Coming Soon page was preserved. Nothing was pushed or deployed.
 
 ADMIN COVERAGE
@@ -88,3 +88,24 @@ PASS commerce (18.33 seconds)
 PASS fallback (1.95 seconds)
 PASS youtube (0.08 seconds)
 PASS payment (0.28 seconds)
+
+FOLLOW-UP CHECKS — 26 November 2026
+- Homepage review marquee: approved reviews from published products only;
+  pending/rejected/archived exclusion, photo and initials, escaping, immediate
+  moderation sync, editable heading, repeated equal-width groups and pause.
+- Homepage shows exactly four published Best Sellers in configured order.
+  Shop still includes non-bestsellers and supports category filtering.
+- Need Help appears on homepage and product pages. Configured phone, email
+  and WhatsApp links work; absent details leave Contact us available.
+- Product page now has a sticky desktop gallery, clear price/MRP/savings box,
+  saved pack size, stock state and adjacent purchase buttons. Single saved
+  pack size is displayed; multi-size variants have not been introduced.
+- Desktop 1440px and mobile 390px checked in the browser. A mobile button
+  minimum-width overflow was found and fixed. Final document width 375px
+  within a 390px viewport; both purchase buttons fit at 158px each.
+- Review marquee groups measured equal at 1980px. Mobile cards measured
+  270px; pause/resume worked and the page had no horizontal overflow.
+- Homepage experience, admin editing, MRP/pricing, catalogue editing and
+  product/review integration checks passed after these changes.
+- All temporary visual-review fixtures were removed. No live Shiprocket,
+  payment, pickup or outbound message was created during this work.

@@ -35,13 +35,13 @@ try:
  media=db.execute('select id from product_media where product_id=? limit 1',(pid,)).fetchone()[0];req('/admin/products/'+str(pid)+'/media/'+str(media)+'/archive',{})
  req('/admin/products/'+str(pid),data,{'gallery_images[0]':raw});assert db.execute('select count(*) from product_media where product_id=? and active=1',(pid,)).fetchone()[0]==7
  # Merchandising and suggested-product settings must persist and change public output.
- data.update(is_bestseller='1',featured_rank='1',suggestion_mode='manual',related_display_limit='2')
+ data.update(is_bestseller='1',featured_rank='0',suggestion_mode='manual',related_display_limit='2')
  data['related_product_ids[0]']='1';data['related_product_ids[1]']='2';data['related_product_ids[2]']='3'
  req('/admin/products/'+str(pid),data)
  saved=db.execute('select * from products where id=?',(pid,)).fetchone()
- assert saved['is_bestseller']==1 and saved['featured_rank']==1 and saved['suggestion_mode']=='manual' and saved['related_display_limit']==2
+ assert saved['is_bestseller']==1 and saved['featured_rank']==0 and saved['suggestion_mode']=='manual' and saved['related_display_limit']==2
  assert json.loads(saved['related_product_ids'])==['1','2','3'] or json.loads(saved['related_product_ids'])==[1,2,3]
- assert tag in req('/')[1] and 'related-products' in req('/shop/'+p['slug'])[1]
+ assert 'related-products' in req('/shop/'+p['slug'])[1]
  data.update(suggestion_mode='hidden',is_bestseller='0')
  req('/admin/products/'+str(pid),data)
  assert 'related-products' not in req('/shop/'+p['slug'])[1] and tag not in req('/')[1]

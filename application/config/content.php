@@ -75,6 +75,14 @@ All the credit to you.'],
 'founders_heading_accent'=>['Heading second line','And a little curiosity.'],
 'founders_intro'=>['Introduction','Anupam brings an ear for balance. Dilip brings a drummer’s sense of timing. Minitz grew out of their time cooking and making music together.'],
 ],
+'Help and support section'=>[
+'help_heading'=>['Heading','Need help?'],
+'help_text'=>['Description','Questions about a blend or your order? We’re happy to help.'],
+],
+'Customer review section'=>[
+'home_reviews_eyebrow'=>['Small heading','FROM REAL KITCHENS'],
+'home_reviews_heading'=>['Heading','A little honest feedback.'],
+],
 'Made by you'=>[
 'community_eyebrow'=>['Small heading','NOT A CHEF. JUST YOU. THAT’S THE POINT.'],
 'community_heading'=>['Heading','Made'],
