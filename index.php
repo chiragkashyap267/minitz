@@ -2,7 +2,7 @@
 declare(strict_types=1);
 // Public holding page. Full application is available only on the explicitly
 // enabled local PHP development server, never through a URL/query bypass.
-if (!(PHP_SAPI === 'cli-server' && getenv('MINITZ_LOCAL_PREVIEW') === '1')) {
+if (!(PHP_SAPI === 'cli-server' && getenv('MINITZ_LOCAL_PREVIEW') === '1') && !is_file(__DIR__.'/application/storage/private-preview-enabled')) {
     header('Content-Type: text/html; charset=utf-8');
     header('Cache-Control: no-store, max-age=0');
     readfile(__DIR__.'/coming-soon.html');

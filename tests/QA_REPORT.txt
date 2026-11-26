@@ -159,3 +159,5 @@ HOSTINGER SMTP PREPARATION
 
 26 Nov 2026: Added profile dropdown (hover/tap/keyboard), public AWB lookup and admin courier + HTTPS tracking URL. Local tracking integration checks pass for persistence, correct redirect, unknown/unshipped/duplicate/unsafe rejection and no address disclosure. No courier API or live shipment was tested. Announcement welcome/FIRST10 marquee rendered locally; offer code availability remains controlled by Coupons.
 Profile dropdown visually checked on desktop and at 390px: account and tracking links remain visible, ArrowDown opens and Escape closes. Regression found adjacent Blade directive issue on order detail; separated directives and added order-detail rendering assertion to tracking checks.
+
+Deployment preparation: private-preview middleware checks and local smoke passed. Hostinger scripts back up server code/files and MySQL before additive migrations, retain .env/runtime uploads, check DB persistence/storage, and verify public Coming Soon on both domains. Hosted execution is pending authenticated SSH; no claim of hosted storage success until its output is checked.

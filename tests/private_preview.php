@@ -1,0 +1,9 @@
+<?php
+require __DIR__.'/../application/vendor/autoload.php';$app=require __DIR__.'/../application/bootstrap/app.php';$app->make(Illuminate\Contracts\Console\Kernel::class)->bootstrap();
+if(!app()->environment('local'))throw new RuntimeException('Local tests only.');
+$original=storage_path();$tmp=sys_get_temp_dir().'/minitz-preview-'.bin2hex(random_bytes(6));mkdir($tmp);$app->useStoragePath($tmp);touch($tmp.'/private-preview-enabled');
+try{$middleware=new App\Http\Middleware\PublicPreview;foreach(['/','/shop','/account','/track-order','/media/fixture.jpg'] as $path){$request=Illuminate\Http\Request::create($path);$session=new Illuminate\Session\Store('qa',new Illuminate\Session\ArraySessionHandler(120));$request->setLaravelSession($session);$response=$middleware->handle($request,fn()=>response('UNLOCKED'));if(!($response instanceof Symfony\Component\HttpFoundation\BinaryFileResponse)||$response->getFile()->getFilename()!=='coming-soon.html')throw new RuntimeException('Unauthenticated route exposed: '.$path);}
+$request=Illuminate\Http\Request::create('/shop');$session->put('admin_authenticated',true);$request->setLaravelSession($session);$response=$middleware->handle($request,fn()=>response('PREVIEW'));if($response->getContent()!=='PREVIEW'||$response->headers->get('X-Robots-Tag')!=='noindex, nofollow')throw new RuntimeException('Admin preview failed.');
+$session->forget('admin_authenticated');$request=Illuminate\Http\Request::create('/admin/login');$request->setLaravelSession($session);if($middleware->handle($request,fn()=>response('LOGIN'))->getContent()!=='LOGIN')throw new RuntimeException('Admin login blocked.');
+echo "PASS public Coming Soon, private admin session preview, media gating, login and noindex/cache headers.\n";
+}finally{unlink($tmp.'/private-preview-enabled');rmdir($tmp);$app->useStoragePath($original);}

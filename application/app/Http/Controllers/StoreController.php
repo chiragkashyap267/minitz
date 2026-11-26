@@ -89,7 +89,7 @@ class StoreController {
         }
     }
     private function cancelUnpaid(object $o):void {DB::transaction(function()use($o){$locked=DB::table('orders')->where('id',$o->id)->lockForUpdate()->first();if($locked->status!=='awaiting_payment')return;if($locked->inventory_reserved)foreach(json_decode($locked->items,true) as $item)\App\Services\PackVariants::restore($item);DB::table('coupon_redemptions')->where('order_id',$o->id)->where('status','reserved')->update(['status'=>'released','updated_at'=>now()]);DB::table('orders')->where('id',$o->id)->update(['status'=>'cancelled','inventory_reserved'=>false,'updated_at'=>now()]);});}
-    public function login(){return view('login',$this->common());}
+    public function login(){if(is_file(storage_path('private-preview-enabled')))return view('preview-login');return view('login',$this->common());}
     public function authenticate(Request $r){$d=$r->validate(['email'=>'required|email','password'=>'required|string']);if(!config('store.admin_hash')||strtolower($d['email'])!==strtolower(config('store.admin_email')??'')||!Hash::check($d['password'],config('store.admin_hash')))return back()->with('error','The email or password is incorrect.')->withInput($r->only('email'));$r->session()->regenerate();session(['admin_authenticated'=>true]);return redirect('/admin');}
     public function logout(Request $r){$r->session()->invalidate();$r->session()->regenerateToken();return redirect('/admin/login');}
     public function admin(Request $r,string $section='overview'){

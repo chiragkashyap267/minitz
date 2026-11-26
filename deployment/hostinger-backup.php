@@ -1,0 +1,6 @@
+<?php
+if(PHP_SAPI!=='cli'){http_response_code(404);exit;}
+$root=$argv[1];$file=$argv[2];require $root.'/application/vendor/autoload.php';$app=require $root.'/application/bootstrap/app.php';$app->make(Illuminate\Contracts\Console\Kernel::class)->bootstrap();
+$pdo=Illuminate\Support\Facades\DB::connection()->getPdo();if($pdo->getAttribute(PDO::ATTR_DRIVER_NAME)!=='mysql')throw new RuntimeException('Expected Hostinger MySQL.');
+$f=fopen($file,'x');if(!$f)throw new RuntimeException('Cannot create backup');chmod($file,0600);fwrite($f,"SET FOREIGN_KEY_CHECKS=0;\n");$pdo->beginTransaction();
+try{foreach($pdo->query('SHOW TABLES')->fetchAll(PDO::FETCH_COLUMN) as $table){$name='`'.str_replace('`','``',$table).'`';$ddl=$pdo->query('SHOW CREATE TABLE '.$name)->fetch(PDO::FETCH_NUM)[1];fwrite($f,$ddl.";\n");$q=$pdo->query('SELECT * FROM '.$name);while($row=$q->fetch(PDO::FETCH_ASSOC)){$cols=implode(',',array_map(fn($v)=>'`'.str_replace('`','``',$v).'`',array_keys($row)));$vals=implode(',',array_map(fn($v)=>$v===null?'NULL':$pdo->quote((string)$v),array_values($row)));fwrite($f,'INSERT INTO '.$name.' ('.$cols.') VALUES ('.$vals.");\n");}}$pdo->commit();fwrite($f,"SET FOREIGN_KEY_CHECKS=1;\n");fclose($f);echo "Database backup saved privately.\n";}catch(Throwable $e){if($pdo->inTransaction())$pdo->rollBack();fclose($f);throw $e;}

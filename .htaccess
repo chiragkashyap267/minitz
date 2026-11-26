@@ -3,13 +3,11 @@ Options -Indexes
 <IfModule mod_rewrite.c>
     RewriteEngine On
     RewriteRule ^(?:application|\.git)(?:/|$) - [F,L,NC]
-    # Temporary public holding page for both domains and all website paths.
-    # Remove these three rules together when the store is ready for launch.
+    # The front controller defaults to Coming Soon. Private preview requires
+    # a server-only marker plus an authenticated administrator session.
+    RewriteRule ^(?:deployment|tests|assets/preview)(?:/|$) - [F,L,NC]
+    RewriteRule ^assets/ - [L]
     RewriteRule ^coming-soon\.html$ - [L]
-    RewriteRule ^assets/favicon\.svg$ - [L]
-    RewriteRule ^ coming-soon.html [L]
-    RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^ index.php [L]
 </IfModule>
 <IfModule mod_headers.c>
