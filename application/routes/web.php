@@ -3,6 +3,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\StoreController as S;
 use App\Http\Controllers\CommerceController as C;
 use App\Http\Controllers\BlogController as B;
+use App\Http\Controllers\CommunityController as U;
 use App\Http\Controllers\ProductExperienceController as P;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -15,6 +16,8 @@ Route::get('/shop/{slug}',[P::class,'detail']);
 RateLimiter::for('reviews',fn(\Illuminate\Http\Request $r)=>Limit::perMinute(5)->by('review|'.(session('customer_id')??$r->ip())));
 Route::post('/products/{id}/reviews',[P::class,'saveReview'])->whereNumber('id')->middleware('throttle:reviews');
 Route::get('/review-media/{id}',[P::class,'reviewPhoto'])->whereNumber('id');
+Route::get('/community',[U::class,'index']);
+Route::post('/community/photos',[U::class,'save'])->middleware('throttle:reviews');
 Route::get('/blogs',[B::class,'index']);
 Route::get('/blogs/{slug}',[B::class,'show']);
 Route::get('/recipes',[S::class,'recipes']);
@@ -43,6 +46,8 @@ Route::post('/admin/login',[S::class,'authenticate'])->middleware('throttle:admi
 Route::middleware('admin')->group(function(){
  Route::post('/admin/logout',[S::class,'logout']);
  Route::get('/admin',[S::class,'admin']);
+ Route::get('/admin/community',[U::class,'dashboard']);
+ Route::post('/admin/community/{id}',[U::class,'visibility'])->whereNumber('id');
  Route::get('/admin/reviews',[P::class,'reviewsAdmin']);
  Route::post('/admin/reviews/{id}',[P::class,'moderate'])->whereNumber('id');
  Route::get('/admin/products/{id}/media',[P::class,'mediaEditor'])->whereNumber('id');

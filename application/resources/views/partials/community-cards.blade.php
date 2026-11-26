@@ -1,0 +1,1 @@
+<div class="community-photo-grid">@foreach($communityPhotos as $photo)<figure class="community-photo-card"><a href="/{{ $photo->image }}" target="_blank" rel="noopener"><img src="/{{ $photo->image }}" alt="{{ $photo->title }}" width="480" height="480" loading="lazy"></a><figcaption>{{ $photo->title }}</figcaption></figure>@endforeach</div>

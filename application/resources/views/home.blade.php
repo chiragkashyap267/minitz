@@ -30,5 +30,5 @@
   </div></div>
 </section>
 @include('partials.brand-world')
-<section class="community-section section community-flow"><div class="community-heading"><span class="eyebrow">{{ $settings['community_eyebrow'] }}</span><h2>{{ $settings['community_heading'] }}<em>{{ $settings['community_heading_accent'] }}</em></h2>@include('partials.doodle',['kind'=>'star'])</div><div class="community-copy"><p>{{ $settings['community_intro'] }}</p><p class="small-copy">{{ $settings['community_text'] }}</p><a class="button button-dark" href="/pages/contact">Let’s talk food</a></div>@include('partials.mascot',['pose'=>'welcome','words'=>$settings['community_bubble']])</section>
+<section class="community-section section community-flow community-sharing" id="made-by-you"><div class="community-left"><div class="community-heading"><span class="eyebrow">{{ $settings['community_eyebrow'] }}</span><h2>{{ $settings['community_heading'] }}<em>{{ $settings['community_heading_accent'] }}</em></h2></div>@include('partials.community-upload')</div><div class="community-right">@include('partials.mascot',['pose'=>'welcome','words'=>$settings['community_bubble']])</div><div class="community-gallery">@if($communityPhotos->isNotEmpty())@include('partials.community-cards')<a class="button button-dark" href="/community">See all food moments</a>@endif</div></section>
 @endsection

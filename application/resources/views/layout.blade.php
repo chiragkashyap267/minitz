@@ -10,7 +10,7 @@
 <link rel="stylesheet" href="/assets/store.css?v=2"><link rel="stylesheet" href="/assets/forms.css?v=1">
 <link rel="stylesheet" href="/assets/experience.css?v=2">
 <link rel="stylesheet" href="/assets/paper-story.css?v=4">
-<link rel="stylesheet" href="/assets/blogs.css?v=2"><link rel="stylesheet" href="/assets/product-experience.css?v=7"><script src="/assets/product-experience.js?v=1" defer></script>
+<link rel="stylesheet" href="/assets/community.css?v=1"><link rel="stylesheet" href="/assets/blogs.css?v=2"><link rel="stylesheet" href="/assets/product-experience.css?v=7"><script src="/assets/product-experience.js?v=1" defer></script>
 <script src="/assets/paper-story.js?v=2" defer></script>
 <script src="/assets/store.js?v=2" defer></script>
 <script src="/assets/experience.js?v=3" defer></script>
