@@ -15,12 +15,16 @@ curl --fail --location --retry 2 "https://codeload.github.com/chiragkashyap267/m
 unzip -q "$work/release.zip" -d "$work"
 release="$work/minitz-$commit"
 [[ -f "$release/deployment/hostinger-check.php" ]] || { echo "Invalid release layout"; exit 1; }
+# unzip inherits the private backup umask; normalize ONLY release source files
+# before cp -a, which also preserves the source directory mode on public_html.
+find "$release" -type d -exec chmod 755 {} +
+find "$release" -type f -exec chmod 644 {} +
 echo "Creating private code, uploads and database backups..."
 tar --exclude='./.git' -czf "$backup/site.tar.gz" -C "$root" .
 php "$release/deployment/hostinger-backup.php" "$root" "$backup/database.sql"
 # Keep visitors on Coming Soon while installing and migrating.
 if [[ -f "$root/application/storage/private-preview-enabled" ]]; then mv "$root/application/storage/private-preview-enabled" "$backup/previous-preview-marker"; fi
-trap 'echo "Deployment stopped. Public site remains Coming Soon. Backup: $backup"' ERR
+trap 'rm -f "$root/application/storage/private-preview-enabled"; echo "Deployment stopped. Private preview disabled. Backup: $backup"' ERR
 # Release has no .env, vendor, runtime uploads or database files; retain the server copies.
 cp -a "$release/." "$root/"
 cd "$root/application"
