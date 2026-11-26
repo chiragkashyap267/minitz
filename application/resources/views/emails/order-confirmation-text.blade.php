@@ -3,7 +3,7 @@ Hello {{ $order->name }},
 We have received your payment for order MZ-{{ str_pad($order->id,5,'0',STR_PAD_LEFT) }}.
 
 @foreach(json_decode($order->items,true)?:[] as $item)
-{{ $item['name'] }} × {{ $item['quantity'] }} — {{ mz_money($item['price']*$item['quantity']) }}
+{{ $item['name'] }} @if(!empty($item['weight']))· {{ $item['weight'] }}@endif × {{ $item['quantity'] }} — {{ mz_money($item['price']*$item['quantity']) }}
 @endforeach
 
 Subtotal: {{ mz_money($order->subtotal) }}

@@ -156,3 +156,6 @@ HOSTINGER SMTP PREPARATION
   delivery. Live order emails require live payment mode, not STORE_DEMO=true.
 - Shipped/delivered emails, mail-failure retries and Brevo abandoned-cart
   integration remain separate pending work.
+
+26 Nov 2026: Added profile dropdown (hover/tap/keyboard), public AWB lookup and admin courier + HTTPS tracking URL. Local tracking integration checks pass for persistence, correct redirect, unknown/unshipped/duplicate/unsafe rejection and no address disclosure. No courier API or live shipment was tested. Announcement welcome/FIRST10 marquee rendered locally; offer code availability remains controlled by Coupons.
+Profile dropdown visually checked on desktop and at 390px: account and tracking links remain visible, ArrowDown opens and Escape closes. Regression found adjacent Blade directive issue on order detail; separated directives and added order-detail rendering assertion to tracking checks.

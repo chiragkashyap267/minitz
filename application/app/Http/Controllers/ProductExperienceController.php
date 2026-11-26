@@ -14,7 +14,8 @@ class ProductExperienceController extends StoreController {
   $reviews=DB::table('product_reviews')->join('customers','customers.id','=','product_reviews.customer_id')->where('product_id',$product->id)->where('status','approved')->select('product_reviews.*','customers.name')->orderByDesc('product_reviews.id')->paginate(6,['*'],'reviews_page')->withQueryString();
   $rating=DB::table('product_reviews')->where('product_id',$product->id)->where('status','approved')->avg('rating');
   $customer=Cart::customer();$myReview=$customer?DB::table('product_reviews')->where('product_id',$product->id)->where('customer_id',$customer->id)->first():null;
-  return view('product',$this->common()+compact('product','gallery','related','reviews','rating','myReview'));
+  $packOptions=\App\Services\PackVariants::options($product);$product=\App\Services\PackVariants::defaultFor($product);
+  return view('product',$this->common()+compact('product','gallery','related','reviews','rating','myReview','packOptions'));
  }
  public function mediaEditor(int $id){$product=DB::table('products')->find($id);abort_unless($product,404);return view('admin',$this->common()+['section'=>'product-media','product'=>$product,'gallery'=>DB::table('product_media')->where('product_id',$id)->where('active',true)->orderBy('position')->orderBy('id')->get()]);}
  public function addMedia(Request $r,int $id){

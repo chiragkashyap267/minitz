@@ -34,10 +34,11 @@ class Cart {
     }
 
     public static function summary(): array {
-        $items=[]; $subtotal=0;
-        foreach (session('cart',[]) as $id=>$quantity) {
-            $product=DB::table('products')->where('id',$id)->where('active',true)->first();
-            if ($product) { $items[]=compact('product','quantity'); $subtotal += $product->price*$quantity; }
+        $items=[]; $subtotal=0; $unavailable=false;
+        foreach (session('cart',[]) as $key=>$quantity) {
+            $row=PackVariants::fromKey((string)$key);
+            if(!$row)$unavailable=true;
+            if($row){$row['quantity']=(int)$quantity;$items[]=$row;$subtotal+=$row['product']->price*$quantity;}
         }
         $discount=0; $coupon=null; $couponError=null;
         if (session('coupon_code') && $items) {
@@ -45,6 +46,6 @@ class Cart {
             catch (ValidationException $e) { $couponError=collect($e->errors())->flatten()->first(); }
         }
         $shipping=self::delivery($subtotal);
-        return compact('items','subtotal','shipping','discount','coupon','couponError')+['total'=>$subtotal-$discount+$shipping,'count'=>array_sum(array_column($items,'quantity'))];
+        return compact('items','subtotal','shipping','discount','coupon','couponError','unavailable')+['total'=>$subtotal-$discount+$shipping,'count'=>array_sum(array_column($items,'quantity'))];
     }
 }

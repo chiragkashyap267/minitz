@@ -9,7 +9,7 @@ use App\Http\Controllers\NewsletterController as N;
 use App\Http\Controllers\ProductExperienceController as P;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Cache\RateLimiting\Limit;
-foreach(['cart'=>60,'checkout'=>10,'admin-login'=>5,'customer-auth'=>10,'payments'=>20,'webhook'=>120,'contact'=>5,'newsletter'=>5] as $name=>$limit) {
+foreach(['cart'=>60,'checkout'=>10,'admin-login'=>5,'customer-auth'=>10,'payments'=>20,'webhook'=>120,'contact'=>5,'newsletter'=>5,'tracking'=>10] as $name=>$limit) {
  RateLimiter::for($name,fn(\Illuminate\Http\Request $r)=>Limit::perMinute($limit)->by($name.'|'.$r->ip()));
 }
 Route::get('/',[S::class,'home']);
@@ -28,6 +28,8 @@ Route::get('/blogs/{slug}',[B::class,'show']);
 Route::get('/recipes',[S::class,'recipes']);
 Route::get('/recipes/{slug}',[S::class,'recipe']);
 Route::get('/recipes/{slug}/receipt',[C::class,'recipeReceipt']);
+Route::get('/track-order',[S::class,'trackOrderPage']);
+Route::post('/track-order',[S::class,'trackOrder'])->middleware('throttle:tracking');
 Route::get('/account',[C::class,'account']);
 Route::post('/account/login',[C::class,'customerLogin'])->middleware('throttle:customer-auth');
 Route::post('/account/register',[C::class,'customerRegister'])->middleware('throttle:customer-auth');

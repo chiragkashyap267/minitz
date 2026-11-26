@@ -1,6 +1,9 @@
 <?php
 // Defaults and admin labels for editable homepage copy.
 return [
+'Announcement bar'=>[
+'announcement_offer'=>['Offer message','Use code FIRST10 at checkout'],
+],
 'Homepage introduction'=>[
 'hero_eyebrow'=>['Small heading','FOR THE JOY OF MAKING IT YOURSELF'],
 'hero_footnote'=>['Footnote','A little help from us.
@@ -74,6 +77,10 @@ All the credit to you.'],
 'founders_heading'=>['Heading','Food. Music.'],
 'founders_heading_accent'=>['Heading second line','And a little curiosity.'],
 'founders_intro'=>['Introduction','Anupam brings an ear for balance. Dilip brings a drummer’s sense of timing. Minitz grew out of their time cooking and making music together.'],
+],
+'Customer help bot'=>[
+'help_bot_name'=>['Bot name','Minitz kitchen help'],
+'help_bot_intro'=>['Welcome message','Hi! I’m your little kitchen helper. What can I help you find?'],
 ],
 'Newsletter popup'=>[
 'newsletter_heading'=>['Heading','Good things from the kitchen.'],
