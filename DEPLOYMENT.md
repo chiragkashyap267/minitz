@@ -135,3 +135,5 @@ Review submissions now use a display name, 1–5 stars, a description up to 500 
 Empty text/number fields and textareas have field-specific example placeholders. These are low-opacity hints, not saved values; visible labels and validation remain in place. Native file, date and checkbox controls retain their appropriate native UI.
 
 Admin simplification: run migrations on deployment to standardize existing blog authors as Minitz Kitchen. New saves use that author automatically; blank blog links preserve existing slugs or generate a unique slug for a new story. Advanced product, blog SEO and website settings remain available in expandable groups.
+
+Minitz TV: /admin/tv now owns broadcast link, title and visibility settings with a saved-player preview. Website content saves no longer change broadcast settings. Broadcasting starts on YouTube Studio/mobile/encoder; this integration embeds the selected event, not camera capture or automatic live detection. No API key or stream key is stored.

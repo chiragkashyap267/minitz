@@ -59,6 +59,7 @@ Route::middleware('admin')->group(function(){
  Route::post('/admin/products/{id?}',[S::class,'saveProduct'])->whereNumber('id');
  Route::post('/admin/recipes/{id?}',[S::class,'saveRecipe'])->whereNumber('id');
  Route::post('/admin/archive/{type}/{id}',[S::class,'deleteItem'])->whereNumber('id');
+ Route::post('/admin/tv',[S::class,'saveBroadcast']);
  Route::post('/admin/content',[S::class,'saveContent']);
  Route::post('/admin/coupons/{id?}',[C::class,'saveCoupon'])->whereNumber('id');
  Route::post('/admin/coupons/{id}/status',[C::class,'couponStatus'])->whereNumber('id');
