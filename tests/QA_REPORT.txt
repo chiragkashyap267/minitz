@@ -1,0 +1,90 @@
+MINITZ LOCAL QA REPORT — 26 November 2026
+
+Result: 13 of 13 automated suites passed. Tested locally on PHP 8.3 and SQLite.
+The public Coming Soon page was preserved. Nothing was pushed or deployed.
+
+ADMIN COVERAGE
+All 13 admin screens load. Every one of the 82 configurable homepage copy
+fields was changed through the admin endpoint, checked in the database,
+reopened in the editor and verified in rendered homepage HTML.
+Core headings, announcements, three artwork slots, support/social links,
+delivery amounts and all five policy pages were checked as well.
+Invalid social URLs were rejected without changing saved settings.
+
+PRODUCTS
+Category creation/duplicate rejection and dropdown persistence; cover plus
+seven image uploads; eight thumbnails; eighth-image rejection; archive and
+replacement; decimal selling price/MRP; sale badge; checkout uses selling price;
+bestseller flag/order; manual suggestions and display limit; hide suggestions.
+
+OTHER EDITORS
+Recipes: create, edit all text/time/servings, retain photo and URL, view receipt,
+archive and confirm public URL no longer opens.
+Videos: actual MP4 and poster upload, edit title/caption, preserve files on text
+updates, show/hide and verify homepage output.
+Blogs: protected editing, automatic author, stable URL on edit, draft/publish/
+unpublish, search/category, escaped story text and metadata.
+Coupons: edit flat/percentage decimals, caps, dates, global/per-customer limits,
+pause, invalid percentages, removal and actual demo checkout totals.
+Orders: processing/shipped/delivered, persisted tracking, invalid status rejection,
+preview fulfilment blocked, customer/order access isolation.
+Reviews: sign-in required, photo persistence/private delivery, name initials,
+update existing review, moderation, escaping and verified-purchase rules.
+Minitz TV: saved URL/title/visibility, preview, strict YouTube URL validation,
+content saves do not reset the broadcast and disabled-player fallback.
+Community: immediate upload visibility, persistent file/row, image validation,
+admin-only hide/show and gallery output.
+Contact: both forms, persisted inbox, validation, CSRF and private admin access.
+Payment fixtures: signature rejection, amount/currency mismatch, captured
+webhook and duplicate webhook idempotency. No money was charged.
+
+BUGS FIXED
+- Three story headings were hardcoded; now read their saved admin values.
+- Final story note was not rendered; it now appears when populated.
+- Two community text settings were disconnected; now control the upload heading
+  and introduction, with updated defaults and labels.
+- Video captions were saved but absent publicly; now displayed on video cards.
+- Gallery help text now states the seven-image limit accurately.
+- Mobile editor fields stack so poster uploads have adequate width.
+- Empty review sections use a full-width form instead of an empty left column.
+
+VISUAL AND INTERACTION CHECKS
+390px viewport: nine admin sections checked for page overflow and broken images;
+product modal scrolling and a real Save action verified in the browser.
+320px viewport: blog form width checked. 1440px: scrolling desktop sidebar verified.
+Mobile cart drawer add/remove and golden star selection checked.
+Food-photo marquee position, continuous track and pause/resume checked.
+19 doodles receive scroll appearance handling; inner SVG groups gently sway or
+turn, preserving outer positions. Reduced-motion CSS disables their movement.
+Hero circle refined; desktop/mobile text fits, with two lines on mobile.
+Review form width equals its available section width when no reviews exist.
+
+DATA AND LIMITS
+Test fixtures removed. Compared every original database table against the
+pre-test backup: original rows/values preserved, excluding updated_at timestamps.
+No testing extension was required.
+This was a local functional/browser audit, not a Hostinger deployment, load test
+or full penetration test. Browser viewport tests do not replace real-device
+Safari/Android testing. Hostinger MySQL/filesystem deployment still needs its own
+smoke check. Real Razorpay transactions, a real founder YouTube live stream,
+SMTP delivery and production credentials were not exercised.
+
+REPRODUCE
+From this repository: python tests/run_local.py
+Each suite runs sequentially with local cache/rate-limit isolation.
+Detailed logs: C:\Users\CHIRAG~1\AppData\Local\Temp\minitz-test-results-q7bzhhkl
+
+SUITES
+PASS smoke (5.87 seconds)
+PASS admin_editing (15.23 seconds)
+PASS catalogue_editor (6.64 seconds)
+PASS pricing (4.05 seconds)
+PASS blogs (5.6 seconds)
+PASS broadcast (4.35 seconds)
+PASS product_experience (13.88 seconds)
+PASS community (6.35 seconds)
+PASS contact (3.59 seconds)
+PASS commerce (18.33 seconds)
+PASS fallback (1.95 seconds)
+PASS youtube (0.08 seconds)
+PASS payment (0.28 seconds)

@@ -18,6 +18,17 @@
     iframe.allowFullscreen = true; iframe.referrerPolicy = 'strict-origin-when-cross-origin';
     iframe.className = 'tv-live-frame'; button.replaceWith(iframe); iframe.focus();
   });
+  if ('IntersectionObserver' in window) {
+    const doodleObserver = new IntersectionObserver(entries => entries.forEach(({target,isIntersecting}) => {
+      target.classList.toggle('doodle-in-view', isIntersecting);
+      if (isIntersecting) target.classList.add('doodle-visible');
+    }), { threshold: 0.08 });
+    document.querySelectorAll('main .kitchen-doodle').forEach((node,i) => {
+      node.classList.add('doodle-ready');
+      node.style.setProperty('--doodle-delay', `${i % 4 * -1.3}s`);
+      doodleObserver.observe(node);
+    });
+  }
   const story = document.querySelector('[data-paper-tale]');
   if (!story) return;
   const steps = [...story.querySelectorAll('[data-tale-step]')];
