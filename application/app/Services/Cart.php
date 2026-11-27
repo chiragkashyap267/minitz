@@ -6,7 +6,8 @@ use Illuminate\Validation\ValidationException;
 
 class Cart {
     public static function customer(): ?object {
-        return session('customer_id') ? DB::table('customers')->select('id','name','email')->find(session('customer_id')) : null;
+        $customer=session('customer_id')?DB::table('customers')->select('id','name','email','auth_version')->find(session('customer_id')):null;
+        if($customer&&(int)session('customer_auth_version',1)!==(int)$customer->auth_version){session()->forget(['customer_id','customer_auth_version','order_tokens']);return null;}return $customer;
     }
 
     public static function coupon(string $code, int $subtotal, ?string $email = null, bool $lock = false): array {

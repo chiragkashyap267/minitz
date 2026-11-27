@@ -7,7 +7,7 @@ def get(c,path):return c.open(BASE+path,timeout=25).read().decode()
 def post(c,path,data):
  token=re.search(r'name="csrf-token" content="([^"]+)"',get(c,'/')).group(1)
  return c.open(BASE+path,urllib.parse.urlencode(dict(data,_token=token),doseq=True).encode(),timeout=25).read().decode()
-db=sqlite3.connect(ROOT/'application/database/database.sqlite');db.row_factory=sqlite3.Row;p=db.execute("select * from products where slug='everyday-garam-masala'").fetchone();admin=client();public=client()
+db=sqlite3.connect(ROOT/'application/database/database.sqlite');db.row_factory=sqlite3.Row;db.execute('PRAGMA foreign_keys=ON');p=db.execute("select * from products where slug='everyday-garam-masala'").fetchone();admin=client();public=client()
 post(admin,'/admin/login',{'email':'preview@minitz.test','password':'Minitz-Preview-Only-2026!'})
 data={k:p[k] or '' for k in ['name','sku','category','weight','description','ingredients','allergens','colour','stock']};data.update(price='375.25',compare_price='499.99',active=str(int(p['active'])),is_bestseller=str(int(p['is_bestseller'])),featured_rank=p['featured_rank'],suggestion_mode=p['suggestion_mode'],related_display_limit=p['related_display_limit'],**{'related_product_ids[]':json.loads(p['related_product_ids'] or '[]')})
 try:

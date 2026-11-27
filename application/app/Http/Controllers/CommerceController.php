@@ -18,16 +18,16 @@ class CommerceController extends StoreController {
         $d=$r->validate(['email'=>'required|email|max:150','password'=>'required|string|max:200']);
         $customer=DB::table('customers')->where('email',strtolower(trim($d['email'])))->first();
         if (!$customer || !Hash::check($d['password'],$customer->password)) return back()->with('error','The email or password is incorrect.')->withInput($r->only('email'));
-        $r->session()->forget('order_tokens');$r->session()->regenerate(); session(['customer_id'=>$customer->id]);
+        $r->session()->forget('order_tokens');$r->session()->regenerate(); session(['customer_id'=>$customer->id,'customer_auth_version'=>$customer->auth_version]);
         return redirect('/account')->with('success','Welcome back. Your kitchen corner is ready.');
     }
     public function customerRegister(Request $r) {
         $r->merge(['email'=>strtolower(trim((string)$r->input('email')))]);
         $d=$r->validate(['name'=>'required|string|max:100','email'=>'required|email|max:150|unique:customers,email','password'=>'required|string|min:12|max:200|confirmed']);
         $id=DB::table('customers')->insertGetId(['name'=>$d['name'],'email'=>$d['email'],'password'=>Hash::make($d['password']),'created_at'=>now(),'updated_at'=>now()]);
-        $r->session()->forget('order_tokens');$r->session()->regenerate(); session(['customer_id'=>$id]); return redirect('/account')->with('success','Your kitchen corner is ready.');
+        $r->session()->forget('order_tokens');$r->session()->regenerate(); session(['customer_id'=>$id,'customer_auth_version'=>1]); return redirect('/account')->with('success','Your kitchen corner is ready.');
     }
-    public function customerLogout(Request $r) { $r->session()->forget(['customer_id','order_tokens']); $r->session()->regenerate(); $r->session()->regenerateToken(); return redirect('/account'); }
+    public function customerLogout(Request $r) { $r->session()->forget(['customer_id','customer_auth_version','order_tokens']); $r->session()->regenerate(); $r->session()->regenerateToken(); return redirect('/account'); }
     public function drawer() { return $this->cartResponse(); }
     public function applyCoupon(Request $r) {
         $d=$r->validate(['code'=>'required|string|max:30']); $cart=Cart::summary();

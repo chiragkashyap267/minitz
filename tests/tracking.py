@@ -2,7 +2,7 @@
 from pathlib import Path
 import sqlite3, uuid, json, urllib.request, urllib.parse, urllib.error, http.cookiejar, re
 root=Path(__file__).resolve().parents[1]
-db=sqlite3.connect(root/'application/database/database.sqlite')
+db=sqlite3.connect(root/'application/database/database.sqlite');db.execute('PRAGMA foreign_keys=ON')
 base='http://127.0.0.1:8088'
 class NoRedirect(urllib.request.HTTPRedirectHandler):
  def redirect_request(self,*args,**kwargs):return None

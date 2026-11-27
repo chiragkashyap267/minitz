@@ -2,7 +2,7 @@
 from pathlib import Path
 import html,json,subprocess,traceback
 import urllib.request,urllib.parse,urllib.error,http.cookiejar,uuid,re,sqlite3
-ROOT=Path(__file__).resolve().parents[1];BASE='http://127.0.0.1:8088';tag='QACAT'+uuid.uuid4().hex[:8];c=urllib.request.build_opener(urllib.request.ProxyHandler({}),urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar()));db=sqlite3.connect(ROOT/'application/database/database.sqlite');db.row_factory=sqlite3.Row
+ROOT=Path(__file__).resolve().parents[1];BASE='http://127.0.0.1:8088';tag='QACAT'+uuid.uuid4().hex[:8];c=urllib.request.build_opener(urllib.request.ProxyHandler({}),urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar()));db=sqlite3.connect(ROOT/'application/database/database.sqlite');db.row_factory=sqlite3.Row;db.execute('PRAGMA foreign_keys=ON')
 
 def req(path,data=None,files=None):
  headers={'Referer':BASE+'/admin/content'}
@@ -84,7 +84,7 @@ def fulfilment():
  original=dict(db.execute('select * from orders limit 1').fetchone());original.pop('id');original.update(name=tag,email=tag.lower()+'@example.test',token=str(uuid.uuid4()),checkout_token=str(uuid.uuid4()),status='paid',tracking=None,payment_order_id=None,payment_id=None)
  cols=list(original);cur=db.execute('insert into orders ('+','.join(cols)+') values ('+','.join('?' for _ in cols)+')',list(original.values()));ident=cur.lastrowid;created['orders'].append(ident);db.commit()
  for state in ['processing','shipped','delivered']:
-  req('/admin/orders/'+str(ident),{'status':state,'tracking':tag+'-TRACK'})
+  req('/admin/orders/'+str(ident),{'status':state,'tracking':tag+'-TRACK','courier':'QA Courier','tracking_url':'https://courier.example/track/'+tag})
   saved=rows('orders',ident);assert saved['status']==state and saved['tracking']==tag+'-TRACK'
  req('/admin/orders/'+str(ident),{'status':'invalid','tracking':'BAD'});assert rows('orders',ident)['status']=='delivered'
  assert tag in req('/admin/orders?q='+tag)[1] and tag in req('/admin/customers')[1]

@@ -15,6 +15,6 @@ Delivery address:
 {{ $order->name }}
 {{ $order->address }}
 
-View your order: {{ rtrim(config('app.url'),'/') }}/orders/{{ $order->token }}
+View your order: {{ $orderUrl }}
 Reply to this email if you need help.
 This is an order confirmation, not a tax invoice.

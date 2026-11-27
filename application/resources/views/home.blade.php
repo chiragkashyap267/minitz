@@ -8,7 +8,7 @@
 <div class="ticker" aria-hidden="true"><div class="ticker-track">@for($copy=0;$copy<2;$copy++)<div class="ticker-group">@for($item=0;$item<3;$item++)<span class="ticker-words">YOUR KITCHEN. YOUR RULES.</span><span class="ticker-spark">✳</span><span class="ticker-words">A LITTLE HELP FROM MINITZ.</span><span class="ticker-spark">✳</span>@endfor</div>@endfor</div></div>
 @include('partials.paper-story')
 <section class="blend-journey" id="the-blends">
-  <div class="section journey-intro"><div><span class="eyebrow">{{ $settings['blends_eyebrow'] }}</span><h2>{{ $settings['blends_heading'] }}<br><em>{{ $settings['blends_heading_accent'] }}</em></h2><p>{{ $settings['blends_intro'] }}</p>@if($demo)<p class="preview-label">Sample blends, packaging and prices. A little preview of what’s cooking.</p>@endif</div>@include('partials.mascot',['pose'=>'question','words'=>$settings['blends_bubble']])</div>
+  <div class="section journey-intro"><div><span class="eyebrow">{{ $settings['blends_eyebrow'] }}</span><h2>{{ $settings['blends_heading'] }}<br><em>{{ $settings['blends_heading_accent'] }}</em></h2><p>{{ $settings['blends_intro'] }}</p></div>@include('partials.mascot',['pose'=>'question','words'=>$settings['blends_bubble']])</div>
   <div class="home-mobile-products product-grid">@forelse($products as $product)@include('partials.product-card')@empty<p class="full">Our featured blends are coming soon. <a href="/shop">Explore the shop</a></p>@endforelse</div>
   <div class="blend-chapters">
   @foreach($products as $product)

@@ -17,10 +17,12 @@ try{
  try{$send(1);}catch(Symfony\Component\HttpKernel\Exception\HttpException $e){}
  if($fake->sent(OrderConfirmation::class)->count())throw new RuntimeException('Rejected payment triggered mail.');
  $send(70000);$send(70000);
+ if($fake->sent(OrderConfirmation::class)->count()!==0)throw new RuntimeException('Mail bypassed the outbox.');
+ config(['mail.default'=>'smtp']);\App\Services\OrderNotifications::deliver();
  if($fake->sent(OrderConfirmation::class)->count()!==1)throw new RuntimeException('Payment confirmation email missing or duplicated.');
  $mail=$fake->sent(OrderConfirmation::class)->first();if(!$mail->hasTo('mail-fixture@example.test'))throw new RuntimeException('Wrong recipient.');
- $html=$mail->render();foreach(['Masala &lt;tag&gt;','Test Cook &lt;script&gt;','QA street','₹750','₹50','₹100','₹700','/orders/'.$token] as $needle)if(!str_contains($html,$needle))throw new RuntimeException('Email detail missing: '.$needle);
+ $html=$mail->render();foreach(['Masala &lt;tag&gt;','Test Cook &lt;script&gt;','QA street','₹750','₹50','₹100','₹700','/order-access/'.$token] as $needle)if(!str_contains($html,$needle))throw new RuntimeException('Email detail missing: '.$needle);
  if(str_contains($html,'<script>'))throw new RuntimeException('Email content not escaped.');
- $text=view('emails.order-confirmation-text',['order'=>DB::table('orders')->find($id)])->render();if(!str_contains($text,'Masala')||!str_contains($text,'₹700'))throw new RuntimeException('Plain text details missing.');
+ $text=view('emails.order-confirmation-text',['order'=>DB::table('orders')->find($id),'orderUrl'=>\App\Services\OrderLinks::email(DB::table('orders')->find($id))])->render();if(!str_contains($text,'Masala')||!str_contains($text,'₹700'))throw new RuntimeException('Plain text details missing.');
  echo "PASS paid-order email recipient, line items, quantities, delivery/discount/totals, address, order link, escaping, plain text and duplicate-payment protection; no email left the test process.\n";
 }finally{DB::rollBack();}

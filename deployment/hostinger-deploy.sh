@@ -48,3 +48,5 @@ for domain in minitz.in minitz.shop; do
  echo "PUBLIC COMING SOON OK: $domain"
 done
 printf '\nRelease deployed. Public Coming Soon retained on both domains.\nPrivate preview: https://minitz.in/admin/login (existing admin credentials).\nAlso sign in separately on minitz.shop when testing that domain.\nDatabase/files backup and check report: %s\n' "$backup"
+
+printf '\nONE-TIME SETUP: hPanel > Advanced > Cron Jobs > PHP, every minute.\nScript: /home/u112743126/domains/minitz.shop/public_html/application/order-worker.php\nSMTP is needed for queued emails; Razorpay keys/webhooks for live payment/refunds.\n'

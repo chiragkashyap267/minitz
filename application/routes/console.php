@@ -31,3 +31,11 @@ Artisan::command('minitz:ready',function(){
  }
  file_put_contents(storage_path('installed'),now()->toIso8601String());$this->info('Application enabled. Preview mode: '.(config('store.demo')?'yes':'no'));
 });
+
+Artisan::command('minitz:work {--limit=30}',function(){
+ $limit=max(1,min(100,(int)$this->option('limit')));
+ $lock=fopen(storage_path('framework/minitz-worker.lock'),'c');
+ if(!$lock||!flock($lock,LOCK_EX|LOCK_NB)){$this->info('Another worker is active.');return 0;}
+ try{$expiry=\App\Services\PaymentGateway::expire($limit);$refunds=\App\Services\PaymentGateway::processRefunds($limit);$mail=\App\Services\OrderNotifications::deliver($limit);$summary=compact('expiry','refunds','mail');file_put_contents(storage_path('framework/minitz-worker-last-run.json'),json_encode(['at'=>now()->toIso8601String()]+$summary),LOCK_EX);$this->line(json_encode($summary));}
+ finally{flock($lock,LOCK_UN);fclose($lock);}
+});

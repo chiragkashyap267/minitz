@@ -5,7 +5,7 @@ $root=$argv[1]??dirname(__DIR__);require $root.'/application/vendor/autoload.php
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 if(!config('store.demo'))throw new RuntimeException('Keep STORE_DEMO=true during preview QA.');
-foreach(['products','product_categories','product_variants','product_media','product_reviews','orders','customers','blogs','community_photos','contact_messages','newsletter_subscribers'] as $table){if(!Schema::hasTable($table))throw new RuntimeException('Missing table: '.$table);echo 'TABLE OK '.$table.PHP_EOL;}
+foreach(['products','product_categories','product_variants','product_media','product_reviews','orders','customers','blogs','community_photos','contact_messages','newsletter_subscribers','order_requests','order_refunds','order_notifications','order_events','customer_password_resets'] as $table){if(!Schema::hasTable($table))throw new RuntimeException('Missing table: '.$table);echo 'TABLE OK '.$table.PHP_EOL;}
 $key='deployment_probe_'.bin2hex(random_bytes(10));
 try {DB::table('settings')->insert(['key'=>$key,'value'=>'storage-test']);DB::purge();if(DB::table('settings')->where('key',$key)->value('value')!=='storage-test')throw new RuntimeException('Database persistence failed.');echo "DATABASE persistent write/read OK\n";}
 finally {DB::table('settings')->where('key',$key)->delete();}

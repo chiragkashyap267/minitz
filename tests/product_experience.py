@@ -17,7 +17,7 @@ def req(c,path,data=None,files=None,csrf=True):
  try:
   res=c.open(urllib.request.Request(BASE+path,data=data,headers=headers),timeout=25);raw=res.read();return res.status,raw.decode('utf-8',errors='replace'),res.url
  except urllib.error.HTTPError as e:return e.code,e.read().decode('utf-8',errors='replace'),e.url
-public=client();admin=client();cook=client();db=sqlite3.connect(ROOT/'application/database/database.sqlite');db.row_factory=sqlite3.Row;paths=[]
+public=client();admin=client();cook=client();db=sqlite3.connect(ROOT/'application/database/database.sqlite');db.row_factory=sqlite3.Row;db.execute('PRAGMA foreign_keys=ON');paths=[]
 p=db.execute("select * from products where slug='everyday-garam-masala'").fetchone();pid=p['id'];slug=p['slug'];product_path='/shop/'+slug
 png=io.BytesIO((ROOT/'assets/artwork-01.png').read_bytes());photo={'photo':('review.png','image/png',png.getvalue())}
 try:
