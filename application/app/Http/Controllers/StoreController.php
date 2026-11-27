@@ -124,12 +124,11 @@ class StoreController {
         return redirect('/admin/tv')->with('success',$r->boolean('tv_enabled')?'Broadcast saved and shown on the website.':'Broadcast hidden. The kitchen story is shown instead.');
     }
     public function saveContent(Request $r){
-        $d=$r->validate(['announcement'=>'required|string|max:200','hero_heading'=>'required|string|max:100','hero_text'=>'required|string|max:500','about_heading'=>'required|string|max:150','about_text'=>'required|string|max:3000','support_email'=>'nullable|email|max:150','support_phone'=>'nullable|string|max:30','whatsapp'=>'nullable|regex:/^[0-9]{10,15}$/','instagram'=>'nullable|url:https|max:300','facebook'=>'nullable|url:https|max:300','youtube'=>'nullable|url:https|max:300','shipping_paise'=>'required|integer|min:0|max:100000','free_shipping_paise'=>'required|integer|min:0|max:10000000']);
-        $copyRules=[];foreach(config('content',[]) as $fields)foreach($fields as $key=>$field)$copyRules[$key]='nullable|string|max:10000';$d+=$r->validate($copyRules);
-        foreach(['story_art','blog_mascot'] as $slot)if($r->hasFile('content_images.'.$slot))$d[$slot]=$this->image($r,$this->settings()[$slot]??null,'content_images.'.$slot);
-        $image=$this->image($r,$this->settings()['hero_image']??null);if($image)$d['hero_image']=$image;
-        foreach(['privacy','terms','shipping','returns','payment'] as $policy){$key='policy_'.$policy;$r->validate([$key=>'nullable|string|max:20000']);$d[$key]=$r->input($key,'');}
-        foreach($d as $key=>$value)DB::table('settings')->updateOrInsert(compact('key'),['value'=>$value??'']);return back()->with('success','Website content saved.');
+        // Only everyday website controls are editable here. Omitted and retired
+        // section-copy, policy and delivery fields keep their existing values.
+        $d=$r->validate(['announcement'=>'sometimes|required|string|max:200','announcement_offer'=>'sometimes|nullable|string|max:200','hero_heading'=>'sometimes|required|string|max:100','hero_text'=>'sometimes|nullable|string|max:500','support_email'=>'sometimes|nullable|email|max:150','support_phone'=>'sometimes|nullable|string|max:30','whatsapp'=>'sometimes|nullable|regex:/^[0-9]{10,15}$/','instagram'=>'sometimes|nullable|url:https|max:300','facebook'=>'sometimes|nullable|url:https|max:300','youtube'=>'sometimes|nullable|url:https|max:300']);
+        if($r->hasFile('image'))$d['hero_image']=$this->image($r,$this->settings()['hero_image']??null);
+        foreach($d as $key=>$value)DB::table('settings')->updateOrInsert(compact('key'),['value'=>$value??'']);return back()->with('success','Website settings saved.');
     }
     public function trackOrderPage(){return response()->view('track-order',$this->common())->header('Cache-Control','no-store, private');}
     public function trackOrder(Request $r){

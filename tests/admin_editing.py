@@ -25,26 +25,29 @@ def check(name,fn):
  except Exception as error:failures.append(name+': '+str(error));print('FAIL',name,traceback.format_exc(),flush=True)
 def rows(table,ident):return dict(db.execute('select * from '+table+' where id=?',(ident,)).fetchone())
 def content():
- config=json.loads(subprocess.check_output([r'C:\xampp\php\php.exe','-r',"echo json_encode(require 'application/config/content.php');"],text=True))
- copy={key:tag+'_'+key for fields in config.values() for key in fields}
- data=dict(copy,announcement=tag+'_announcement',hero_heading=tag+'_hero',hero_text=tag+'_intro',about_heading=tag+'_about',about_text=tag+'_story',support_email='qa@example.com',support_phone='9990000000',whatsapp='919990000000',instagram='https://instagram.com/minitzqa',facebook='https://facebook.com/minitzqa',youtube='https://www.youtube.com/@minitzqa',shipping_paise='12300',free_shipping_paise='999900')
- for key in ['privacy','terms','shipping','returns','payment']:data['policy_'+key]=tag+'_'+key
+ data=dict(announcement=tag+'_welcome',announcement_offer=tag+'_offer',hero_heading=tag+'_hero',hero_text=tag+'_intro',support_email='qa@example.com',support_phone='9990000000',whatsapp='919990000000',instagram='https://instagram.com/minitzqa',facebook='https://facebook.com/minitzqa',youtube='https://www.youtube.com/@minitzqa')
+ retired=['about_heading','about_text','faq_intro','hero_eyebrow','shipping_paise','free_shipping_paise','policy_privacy','story_art','blog_mascot']
+ before=dict(db.execute('select key,value from settings'))
  raw=(ROOT/'assets/artwork-01.png').read_bytes()
- req('/admin/content',data,{'image':raw,'content_images[story_art]':raw,'content_images[blog_mascot]':raw})
- actual=dict(db.execute('select key,value from settings'));files.extend(ROOT/'application/storage/app/public/uploads'/Path(actual[key]).name for key in ['hero_image','story_art','blog_mascot'])
- assert all(actual.get(key)==value for key,value in data.items()),'Some settings did not persist'
- editor=req('/admin/content')[1];assert all(html.escape(value) in editor for value in copy.values()),'Some saved text missing from editor'
- page=req('/')[1]
- missing=[key for key,value in copy.items() if value not in page and not (key.startswith('home_reviews_') and 'home-review-marquee' not in page)]
- for key in ['privacy','terms','shipping','returns','payment']:assert tag+'_'+key in req('/pages/'+key)[1]
- for key in ['hero_image','story_art','blog_mascot']:assert actual[key] in page and req('/'+actual[key])[0]==200
+ status,page=req('/admin/content',dict(data,**{key:'SHOULD NOT CHANGE' for key in retired}),{'image':raw,'content_images[story_art]':raw})
+ assert status==200
+ actual=dict(db.execute('select key,value from settings'));files.append(ROOT/'application/storage/app/public/uploads'/Path(actual['hero_image']).name)
+ assert all(actual.get(key)==value for key,value in data.items()),'Basic settings did not persist'
+ assert all(actual.get(key)==before.get(key) for key in retired),'Retired settings changed'
+ editor=req('/admin/content')[1]
+ assert 'Current banner' in editor and actual['hero_image'] in editor
+ for name in data:assert 'name="'+name+'"' in editor,name
+ for name in retired:assert 'name="'+name+'"' not in editor,name
+ assert 'Homepage sections and story copy' not in editor
+ page=req('/')[1];assert data['hero_heading'] in page and data['announcement_offer'] in page and actual['hero_image'] in page
+ assert req('/'+actual['hero_image'])[0]==200
  assert 'qa@example.com' in req('/pages/contact')[1]
  req('/admin/content',dict(data,hero_heading='SHOULD NOT SAVE',instagram='javascript:alert(1)'))
  assert dict(db.execute('select key,value from settings'))['hero_heading']==data['hero_heading']
- # Restore delivery values before checkout suites; all settings are restored in finally.
- for key in ['shipping_paise','free_shipping_paise']:db.execute('update settings set value=? where key=?',(settings[key],key))
- db.commit()
- assert not missing,'Editable fields have no homepage output: '+', '.join(missing)
+ req('/admin/content',{'announcement_offer':''})
+ after=dict(db.execute('select key,value from settings'));assert after['announcement_offer']=='' and after['hero_heading']==data['hero_heading']
+ assert all(after.get(key)==before.get(key) for key in retired),'Partial save cleared hidden settings'
+
 def recipes():
  data=dict(title=tag+' recipe',category='QA',minutes='15',servings='2',description=tag+' intro',ingredients='Salt\nRice',steps='Mix\nCook',active='1')
  req('/admin/recipes',data,{'image':(ROOT/'assets/artwork-01.png').read_bytes()})
@@ -91,7 +94,7 @@ try:
   assert req('/admin'+section)[0]==200,section
  assert req('/admin/reports')[0]==404
  print('PASS all 13 admin screens and disabled PDF dashboard')
- check('All website content fields, artwork, socials, policies and invalid-input atomicity',content)
+ check('Simple website settings, banner upload, saved previews, partial saves and retired-field preservation',content)
  check('Recipe create/edit/reopen, photo preservation, receipt and archive',recipes)
  check('Video and poster upload, metadata update, file preservation and hide',videos)
  check('Coupon edit, decimal conversion, dates, limits and pause',coupons)

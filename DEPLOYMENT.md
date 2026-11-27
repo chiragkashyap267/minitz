@@ -157,3 +157,6 @@ Public routes remain Coming Soon. Open /admin/login with the existing production
 The deployment check verifies persistence and directory permissions, not full HTTP upload or payment delivery. After it succeeds, exercise an image/video upload, a preview checkout, an order PDF and a review through the browser. Do not run the local QA fixture suites against production; they contain local credentials and cleanup steps. SMTP and Razorpay require separate real-account tests.
 
 Hostinger permissions: the deployment archive is extracted under a private umask for backups. Normalize release directories to 755 and release files to 644 before cp -a; otherwise copying the release root can make public_html inaccessible to the web server. This normalization only touches the downloaded source, never the existing .env or runtime storage.
+
+
+Website content editor simplified (27 Nov 2026): /admin/content now edits only announcement welcome/offer text, homepage hero heading/description/image, support email/phone/WhatsApp and optional social links. Other section copy, mascot dialogues, artwork, policy text and delivery settings retain their saved values and are not editable through this endpoint. No migration is needed. Saved content is preserved on partial saves and old/retired fields in a request are ignored.
