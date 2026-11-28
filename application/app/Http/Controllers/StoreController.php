@@ -26,7 +26,7 @@ class StoreController {
     public function product(string $slug){$product=DB::table('products')->where('slug',$slug)->where('active',true)->first();abort_unless($product,404);return view('product',$this->common()+compact('product'));}
     public function recipes(){return view('recipes',$this->common()+['recipes'=>DB::table('recipes')->where('active',true)->get()]);}
     public function recipe(string $slug){$recipe=DB::table('recipes')->where('slug',$slug)->where('active',true)->first();abort_unless($recipe,404);return view('recipe',$this->common()+compact('recipe'));}
-    public function page(string $page){abort_unless(in_array($page,['about','contact','privacy','terms','shipping','returns','payment']),404);return view('page',$this->common()+compact('page'));}
+    public function page(string $page){abort_unless(in_array($page,['about','team','contact','privacy','terms','shipping','returns','payment']),404);return view('page',$this->common()+compact('page'));}
     public function media(string $file){abort_unless(preg_match('/^[a-f0-9-]+\.(webp|png|jpg|mp4|webm)$/',$file),404);$path=storage_path('app/public/uploads/'.$file);abort_unless(is_file($path),404);return response()->file($path,['X-Content-Type-Options'=>'nosniff']);}
     public function add(Request $r){ return $this->storeCartItem($r,false); }
     public function buyNow(Request $r){ return $this->storeCartItem($r,true); }

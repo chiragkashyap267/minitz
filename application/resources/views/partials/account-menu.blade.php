@@ -3,5 +3,8 @@
 <div class="account-dropdown" id="account-dropdown" hidden>
 <a href="/account">{{ $customer ? 'My account / Orders' : 'Login / Sign up' }}</a>
 <a href="/track-order">Track your order</a>
+@if($customer)
+<form method="post" action="/account/logout">@csrf<button type="submit" class="button button-blue customer-signout">Sign out</button></form>
+@endif
 </div>
 </div>
