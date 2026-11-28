@@ -3,9 +3,9 @@ import subprocess,sys,time,json,tempfile,sqlite3
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1];PHP=r'C:\xampp\php\php.exe'
 out=Path(tempfile.mkdtemp(prefix='minitz-test-results-'));results=[]
-for name in ['smoke','admin_editing','homepage_experience','catalogue_editor','variants','pricing','blogs','broadcast','product_experience','community','contact','newsletter','password_reset','order_requests','tracking','commerce','fallback','youtube','payment','order_email','missing_settings','order_lifecycle','private_preview']:
+for name in ['smoke','admin_editing','homepage_experience','catalogue_editor','variants','pricing','blogs','broadcast','product_experience','community','contact','newsletter','password_reset','order_requests','tracking','commerce','fallback','youtube','payment','order_email','missing_settings','order_lifecycle','private_preview','mail_transport','production_mode']:
  subprocess.run([PHP,'application/artisan','cache:clear'],cwd=ROOT,capture_output=True,check=True)
- command=[PHP if name in ['youtube','payment','order_email','missing_settings','order_lifecycle','private_preview'] else sys.executable,str(ROOT/'tests'/(name+('.php' if name in ['youtube','payment','order_email','missing_settings','order_lifecycle','private_preview'] else '.py')))]
+ command=[PHP if name in ['youtube','payment','order_email','missing_settings','order_lifecycle','private_preview','mail_transport','production_mode'] else sys.executable,str(ROOT/'tests'/(name+('.php' if name in ['youtube','payment','order_email','missing_settings','order_lifecycle','private_preview','mail_transport','production_mode'] else '.py')))]
  started=time.monotonic();r=subprocess.run(command,cwd=ROOT,capture_output=True,text=True,encoding='utf-8',errors='replace')
  (out/(name+'.log')).write_text(r.stdout+r.stderr,encoding='utf-8')
  results.append(dict(suite=name,passed=r.returncode==0,seconds=round(time.monotonic()-started,2)))

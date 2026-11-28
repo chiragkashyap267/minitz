@@ -24,7 +24,7 @@ Artisan::command('minitz:ready',function(){
  if(!config('app.key')){$this->error('Generate an application key first.');return 1;}
  try { \Illuminate\Support\Facades\DB::table('products')->count(); } catch(\Throwable $e){$this->error('Configure the database and run migrations first.');return 1;}
  if(!config('store.admin_email')||!config('store.admin_hash')){$this->error('Configure your own admin with php artisan minitz:admin first.');return 1;}
- if(!config('store.demo')){
+ if(!config('store.demo')&&config('store.checkout_enabled')){
   $settings=\Illuminate\Support\Facades\DB::table('settings')->pluck('value','key');
   foreach(['support_email','policy_privacy','policy_terms','policy_shipping','policy_returns','policy_payment'] as $key)if(empty($settings[$key])){$this->error('Approved policies and support contact are required before live mode.');return 1;}
   if(!config('store.key_id')||!config('store.key_secret')||!config('store.webhook_secret')){$this->error('Complete Razorpay configuration before live mode.');return 1;}

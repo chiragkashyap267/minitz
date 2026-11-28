@@ -24,5 +24,5 @@ class OrderUpdate extends Mailable {
  ];
  public function __construct(public object $order,public string $event,public array $extra=[]){}
  public function envelope():Envelope {return new Envelope(subject:'Minitz MZ-'.str_pad($this->order->id,5,'0',STR_PAD_LEFT).' — '.(self::TEXT[$this->event][0]??'Order update'));}
- public function content():Content {return new Content(view:'emails.order-update',text:'emails.order-update-text',with:['orderUrl'=>\App\Services\OrderLinks::email($this->order),'heading'=>self::TEXT[$this->event][0]??'Order update','message'=>self::TEXT[$this->event][1]??'Open your order for the latest update.']);}
+ public function content():Content {return new Content(view:'emails.order-update',text:'emails.order-update-text',with:['orderUrl'=>\App\Services\OrderLinks::email($this->order),'heading'=>self::TEXT[$this->event][0]??'Order update','updateText'=>self::TEXT[$this->event][1]??'Open your order for the latest update.']);}
 }

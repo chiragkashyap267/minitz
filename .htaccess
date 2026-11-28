@@ -7,6 +7,8 @@ Options -Indexes
     # a server-only marker plus an authenticated administrator session.
     RewriteRule ^(?:deployment|tests|assets/preview)(?:/|$) - [F,L,NC]
     RewriteRule ^assets/ - [L]
+    RewriteCond %{DOCUMENT_ROOT}/application/storage/public-store-enabled -f
+    RewriteRule ^(?:index\.html|coming-soon\.html)$ / [R=302,L]
     RewriteRule ^coming-soon\.html$ - [L]
     RewriteRule ^ index.php [L]
 </IfModule>

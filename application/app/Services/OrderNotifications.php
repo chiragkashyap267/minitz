@@ -29,7 +29,7 @@ class OrderNotifications {
     $o=(object)$data['order'];
     $mail=$row->event==='confirmed'?new \App\Mail\OrderConfirmation($o):new \App\Mail\OrderUpdate($o,$row->event,$data['extra']);
     }
-    $mail->withSymfonyMessage(function($message)use($row){$message->getHeaders()->removeAll('Message-ID');$message->getHeaders()->addIdHeader('Message-ID','minitz-notice-'.$row->id.'@'.(parse_url(config('app.url'),PHP_URL_HOST)?:'minitz.in'));});
+    $mail->withSymfonyMessage(function($message)use($row){$message->getHeaders()->remove('Message-ID');$message->getHeaders()->addIdHeader('Message-ID','minitz-notice-'.$row->id.'@'.(parse_url(config('app.url'),PHP_URL_HOST)?:'minitz.in'));});
     Mail::to($row->recipient)->send($mail);
     DB::table('order_notifications')->where('id',$row->id)->where('claim_token',$row->claim_token)->update(['status'=>'sent','sent_at'=>now(),'locked_until'=>null,'error_code'=>null,'updated_at'=>now()]);$result['sent']++;
    }catch(\Throwable $e){

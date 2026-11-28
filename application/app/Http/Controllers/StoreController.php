@@ -13,7 +13,7 @@ use App\Services\Cart;
 
 class StoreController {
     public function settings():array { $defaults=config('site_defaults',[]);foreach(config('content',[]) as $fields)foreach($fields as $key=>$field)$defaults[$key]=$field[1];return array_replace($defaults,DB::table('settings')->pluck('value','key')->all()); }
-    protected function common():array { $cartSummary=Cart::summary();return ['settings'=>$this->settings(),'cartCount'=>$cartSummary['count'],'cartSummary'=>$cartSummary,'customer'=>Cart::customer(),'demo'=>config('store.demo')]; }
+    protected function common():array { $cartSummary=Cart::summary();return ['settings'=>$this->settings(),'cartCount'=>$cartSummary['count'],'cartSummary'=>$cartSummary,'customer'=>Cart::customer(),'demo'=>config('store.demo'),'checkoutAvailable'=>\App\Services\CheckoutAvailability::available()]; }
     protected function cartResponse(?string $message=null) { $data=$this->common();return response()->json(['html'=>view('partials.cart-drawer-content',$data+$data['cartSummary'])->render(),'count'=>$data['cartCount'],'message'=>$message])->header('Cache-Control','no-store, private'); }
     public function home() { return view('home',$this->common()+['homeReviews'=>DB::table('product_reviews')->join('customers','customers.id','=','product_reviews.customer_id')->join('products','products.id','=','product_reviews.product_id')->where('product_reviews.status','approved')->where('products.active',true)->select('product_reviews.*','customers.name','products.name as product_name','products.slug as product_slug')->orderByDesc('product_reviews.id')->limit(12)->get(),'communityPhotos'=>DB::table('community_photos')->where('active',true)->orderByDesc('id')->limit(8)->get(),'blogs'=>DB::table('blogs')->where('active',true)->where('published_at','<=',now())->orderByDesc('published_at')->limit(3)->get(),'products'=>DB::table('products')->where('active',true)->where('is_bestseller',true)->orderBy('featured_rank')->orderBy('id')->limit(4)->get(),'recipes'=>DB::table('recipes')->where('active',true)->limit(3)->get(),'videos'=>DB::table('testimonials')->where('active',true)->get()]); }
     public function shop(Request $r) {
@@ -44,8 +44,9 @@ class StoreController {
     }
     private function cartData():array { return Cart::summary(); }
     public function cart(){return view('cart',$this->common()+$this->cartData());}
-    public function checkout(){if(!$this->cartData()['items'])return redirect('/cart');session()->put('checkout_token',session('checkout_token',Str::uuid()->toString()));return view('checkout',$this->common()+$this->cartData());}
+    public function checkout(){if(!\App\Services\CheckoutAvailability::available())return view('checkout-paused',$this->common());if(!$this->cartData()['items'])return redirect('/cart');session()->put('checkout_token',session('checkout_token',Str::uuid()->toString()));return view('checkout',$this->common()+$this->cartData());}
     public function placeOrder(Request $r){
+        if(!\App\Services\CheckoutAvailability::available())return redirect('/checkout')->with('error','Online checkout will open shortly. No order or payment has been created.');
         $d=$r->validate(['name'=>'required|string|max:100','email'=>'required|email|max:150','phone'=>'required|regex:/^[0-9+ ()-]{10,20}$/','line1'=>'required|string|max:200','city'=>'required|string|max:100','state'=>'required|string|max:100','pincode'=>'required|regex:/^[1-9][0-9]{5}$/','accept'=>'accepted','checkout_token'=>'required|uuid']);
         abort_unless(hash_equals((string)session('checkout_token'),$d['checkout_token']),419);
         $existing=DB::table('orders')->where('checkout_token',$d['checkout_token'])->first();if($existing)return redirect('/orders/'.$existing->token);

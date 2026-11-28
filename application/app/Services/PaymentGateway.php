@@ -14,12 +14,12 @@ class PaymentGateway {
   return $safe;
  }
  public static function expire(int $limit=30):array {
-  $r=['expired'=>0,'deferred'=>0];if(config('store.demo'))return $r;
+  $r=['expired'=>0,'deferred'=>0];if(config('store.demo')||!config('store.key_id')||!config('store.key_secret'))return $r;
   $orders=DB::table('orders')->where('status','awaiting_payment')->where(fn($q)=>$q->where('payment_expires_at','<=',now())->orWhere(fn($q)=>$q->whereNull('payment_expires_at')->where('created_at','<=',now()->subMinutes(config('store.payment_window_minutes',30)))))->orderBy('id')->limit($limit)->get();
   foreach($orders as $o){try{if(self::reconcile($o)&&OrderLifecycle::closeUnpaid($o->id))$r['expired']++;else $r['deferred']++;}catch(\Throwable $e){$r['deferred']++;}}return $r;
  }
  public static function processRefunds(int $limit=20):array {
-  $result=['processed'=>0,'deferred'=>0];if(config('store.demo'))return $result;
+  $result=['processed'=>0,'deferred'=>0];if(config('store.demo')||!config('store.key_id')||!config('store.key_secret'))return $result;
   DB::table('order_refunds')->whereIn('status',['queued','retry','pending'])->where('attempts','>=',8)->where('locked_until','<=',now())->update(['status'=>'attention','locked_until'=>null,'error_code'=>'provider_lease_expired','updated_at'=>now()]);
   for($i=0;$i<$limit;$i++){
    $row=DB::transaction(function(){$r=DB::table('order_refunds')->whereIn('status',['queued','retry','pending'])->where('attempts','<',8)->where(fn($q)=>$q->whereNull('next_attempt_at')->orWhere('next_attempt_at','<=',now()))->where(fn($q)=>$q->whereNull('locked_until')->orWhere('locked_until','<=',now()))->orderBy('id')->lockForUpdate()->first();if(!$r)return null;DB::table('order_refunds')->where('id',$r->id)->update(['locked_until'=>now()->addMinutes(10),'attempts'=>$r->attempts+1,'next_attempt_at'=>now()->addMinutes(5),'updated_at'=>now()]);return $r;});if(!$row)break;
